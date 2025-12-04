@@ -1,0 +1,471 @@
+/* ============================================================
+   MOSAIC LAB — CLEAN FINAL STYLESHEET (2025)
+   ============================================================ */
+
+/* -----------------------------
+   DESIGN TOKENS (DARK DEFAULT)
+   ----------------------------- */
+:root {
+  --bg: #0b0b0f;
+  --card: #0f1115;
+
+  --text-primary: #e6eef6;
+  --text-secondary: #c6ccd8;
+  --text-muted: #9aa1ad;
+
+  --accent1: #7b61ff;
+  --accent2: #3ee8b5;
+
+  --accent-grad: linear-gradient(135deg,var(--accent1),#ff6fd8 60%,var(--accent2));
+  --accent-weak: rgba(123,97,255,0.12);
+
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI";
+  --font-display: "Space Grotesk", var(--font-sans);
+
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+
+  --radius: 12px;
+  --glass-radius: 18px;
+
+  --shadow-1: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* -----------------------------
+   LIGHT MODE
+   ----------------------------- */
+:root[data-theme="light"] {
+  --bg: #f2f4f9;
+  --card: #ffffff;
+
+  --text-primary: #1b1c1f;
+  --text-secondary: #3d414a;
+  --text-muted: #5b606d;
+
+  --accent1: #5b4bff;
+  --accent2: #2ccf9a;
+
+  --accent-grad: linear-gradient(135deg,var(--accent1),#ff4fcb 60%,var(--accent2));
+
+  --shadow-1: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* -----------------------------
+   BASE LAYOUT
+   ----------------------------- */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text-primary);
+  padding: var(--space-5);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h1,h2,h3,h4 {
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+/* -----------------------------
+   HEADER
+   ----------------------------- */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Clean, controlled PNG logo size */
+.logo-img {
+  width: 100px;      /* exact size used by your previous SVG */
+  height: auto;
+  display: block;
+}
+
+.brand {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;   /* FIX: Align text & logo at the top */
+}
+
+.header-nav a {
+  margin-left: var(--space-3);
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.theme-toggle {
+  margin-left: 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .theme-toggle {
+  border-color: rgba(0,0,0,0.15);
+  color: var(--text-primary);
+}
+
+/* -----------------------------
+   HERO
+   ----------------------------- */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.hero-card {
+  background: rgba(255,255,255,0.04);
+  padding: var(--space-4);
+  border-radius: var(--glass-radius);
+}
+:root[data-theme="light"] .hero-card {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.eyebrow {
+  display: inline-block;
+  padding: 6px 10px;
+  background: var(--accent-weak);
+  color: var(--accent1);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lead {
+  margin-top: var(--space-2);
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--accent-grad);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  margin-right: 10px;
+}
+
+/* -----------------------------
+   SIDEPANEL
+   ----------------------------- */
+.side-panel {
+  background: rgba(255,255,255,0.04);
+  padding: var(--space-4);
+  border-radius: var(--glass-radius);
+}
+:root[data-theme="light"] .side-panel {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* -----------------------------
+   PROJECT GRID
+   ----------------------------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: var(--space-4);
+}
+
+.card {
+  padding: var(--space-4);
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius);
+  transition: 0.2s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-1);
+}
+
+/* ============================================================
+   PI — BANNER PROFILE CARD
+   ============================================================ */
+.pi-banner {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+
+  /* CRITICAL: span entire grid */
+  grid-column: 1 / -1;
+}
+
+:root[data-theme="light"] .pi-banner {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.pi-banner-photo {
+  width: 260px;
+  height: 300px;
+  border-radius: var(--radius);
+  object-fit: cover;
+}
+
+.pi-banner-content {
+  flex: 1;
+}
+
+.pi-banner-name {
+  font-family: var(--font-display);
+  font-size: 34px;
+  margin-bottom: 4px;
+}
+
+.pi-banner-role {
+  font-size: 18px;
+  color: var(--accent2);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.pi-banner-bio {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.pi-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pi-section h4 {
+  color: var(--accent1);
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.pi-section ul {
+  margin: 0 0 0 20px;
+  padding: 0;
+}
+
+.pi-section ul li {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.pi-links {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 860px) {
+  .pi-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  .pi-banner-photo {
+    width: 70%;
+    height: auto;
+    margin: 0 auto;
+  }
+  .pi-links {
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   MEMBERS
+   ============================================================ */
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  gap: var(--space-4);
+}
+
+.member-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-1);
+  text-align: center;
+}
+
+.member-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.member-card .role {
+  margin-top: 4px;
+  color: var(--accent2);
+  font-weight: 600;
+}
+
+.small-bio {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* -----------------------------
+   ICON BUTTONS
+   ----------------------------- */
+.member-links,
+.pi-links {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.mini-link {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent1);
+}
+.mini-link svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* ============================================================
+   ALUMNI
+   ============================================================ */
+.alumni-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: var(--space-4);
+}
+
+.alumni-card {
+  background: rgba(255,255,255,0.04);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  text-align: center;
+}
+:root[data-theme="light"] .alumni-card {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.alumni-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================================
+   COLLABORATIONS
+   ============================================================ */
+.collab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+  gap: var(--space-4);
+}
+
+.collab-card {
+  background: rgba(255,255,255,0.04);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+}
+:root[data-theme="light"] .collab-card {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.collab-card a {
+  color: var(--accent1);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ============================================================
+   PUBLICATIONS
+   ============================================================ */
+.pub-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pub-item {
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow-1);
+}
+
+.pub-title {
+  margin: 0 0 6px 0;
+}
+
+.pub-meta {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.pub-journal {
+  color: var(--accent2);
+  font-weight: 700;
+}
+
+.pub-link {
+  color: var(--accent1);
+  margin-left: 8px;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.abstract-toggle {
+  margin-top: 8px;
+  background: transparent;
+  border: none;
+  color: var(--accent1);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+  margin-top: var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+}
+
+/* END CLEAN STYLESHEET */
