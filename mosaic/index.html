@@ -33,7 +33,27 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const buttons = document.querySelectorAll(".abstract-toggle");
 
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const abstract = btn.nextElementSibling;
+
+      if (!abstract) return;
+
+      if (abstract.style.display === "none" || abstract.style.display === "") {
+        abstract.style.display = "block";
+        btn.textContent = "Hide Abstract ▴";
+      } else {
+        abstract.style.display = "none";
+        btn.textContent = "Show Abstract ▾";
+      }
+    });
+  });
+});
+</script>
 <body>
 <div class="container">
 
