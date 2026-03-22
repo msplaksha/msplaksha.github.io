@@ -367,6 +367,28 @@ h1,h2,h3,h4 {
 /* ============================================================
    ALUMNI
    ============================================================ */
+.alumni-section {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+:root[data-theme="light"] .alumni-section {
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.contact-section {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+:root[data-theme="light"] .contact-section {
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+.contact-section a {
+  color: var(--accent1);
+  font-weight: 600;
+  text-decoration: none;
+}
 .alumni-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
