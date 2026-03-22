@@ -238,44 +238,136 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ── MEMBRANE / BBB TRANSPORT ─────────────────────────────────────────────
+  // Blood-Brain Barrier cross-section: blood (top) → lipid bilayer →
+  // brain (bottom). Transporter barrel fixed at centre. Drug molecules
+  // descend from blood, thread through the transporter, emerge in brain.
+  // Blocked molecules (red) are bounced back at the membrane surface.
   function membrane(canvas) {
     const ctx = canvas.getContext("2d");
     fit(canvas);
+    const NPASS = 6, NBLOCKED = 4;
+    // Each passing particle has its own x-lane and travel timer
+    const passers = Array.from({ length: NPASS }, (_, i) => ({
+      lane: (0.10 + i * 0.14),   // fractional x position
+      prog: i / NPASS,           // stagger starts 0→1
+      speed: 0.0022 + Math.random() * 0.0010,
+    }));
+    // Blocked particles float in blood zone
+    const blockers = Array.from({ length: NBLOCKED }, (_, i) => ({
+      x: (0.08 + i * 0.22),
+      phase: (i / NBLOCKED) * Math.PI * 2,
+    }));
     let t = 0, raf;
+
     function draw() {
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
-      t += 0.012;
-      const y1 = H * 0.35, y2 = H * 0.65;
+      t += 0.014;
 
-      // membrane band
-      ctx.fillStyle = "rgba(123,97,255,0.07)";
-      ctx.fillRect(0, y1, W, y2 - y1);
-      ["rgba(123,97,255,0.22)", "rgba(123,97,255,0.22)"].forEach((c, i) => {
-        ctx.strokeStyle = c; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(0, i ? y2 : y1); ctx.lineTo(W, i ? y2 : y1); ctx.stroke();
+      const memTop = H * 0.36, memBot = H * 0.64;
+      const cx = W / 2, transHW = 10; // transporter half-width
+
+      // ── zones ──
+      ctx.fillStyle = "rgba(255,107,107,0.05)";
+      ctx.fillRect(0, 0, W, memTop);
+      ctx.fillStyle = "rgba(123,97,255,0.05)";
+      ctx.fillRect(0, memBot, W, H - memBot);
+
+      // zone labels
+      ctx.font = "8px sans-serif";
+      ctx.fillStyle = "rgba(255,107,107,0.50)"; ctx.fillText("BLOOD", 4, 11);
+      ctx.fillStyle = "rgba(123,97,255,0.50)"; ctx.fillText("BRAIN", 4, H - 4);
+
+      // ── lipid bilayer ──
+      ctx.fillStyle = "rgba(62,232,181,0.09)";
+      ctx.fillRect(0, memTop, W, memBot - memTop);
+      // head-group lines
+      [memTop, memBot].forEach(y => {
+        ctx.strokeStyle = "rgba(62,232,181,0.40)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+        // phosphate heads (circles)
+        const n = Math.floor(W / 18);
+        for (let i = 0; i < n; i++) {
+          const hx = (i + 0.5) * (W / n);
+          if (Math.abs(hx - cx) > transHW + 12) {
+            ctx.beginPath(); ctx.arc(hx, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(62,232,181,0.30)"; ctx.fill();
+          }
+        }
       });
-
-      // lipid tails
-      const nL = Math.floor(W / 20);
-      for (let i = 0; i < nL; i++) {
-        const x = (i + 0.5) * (W / nL);
-        ctx.strokeStyle = "rgba(123,97,255,0.28)"; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y1 + 11); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x, y2); ctx.lineTo(x, y2 - 11); ctx.stroke();
+      // tails
+      const nTails = Math.floor(W / 14);
+      for (let i = 0; i < nTails; i++) {
+        const tx = (i + 0.5) * (W / nTails);
+        if (Math.abs(tx - cx) < transHW + 12) continue;
+        const tailLen = (memBot - memTop) * 0.40;
+        ctx.strokeStyle = "rgba(62,232,181,0.15)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(tx, memTop + 3); ctx.lineTo(tx, memTop + 3 + tailLen); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(tx, memBot - 3); ctx.lineTo(tx, memBot - 3 - tailLen); ctx.stroke();
       }
 
-      // transporter (sweeps left-right)
-      const tx = ((Math.sin(t * 0.4) + 1) / 2) * W;
-      ctx.fillStyle = "rgba(62,232,181,0.55)";
-      ctx.beginPath(); ctx.ellipse(tx, H / 2, 11, 20, 0, 0, Math.PI * 2);
-      ctx.fill(); ctx.strokeStyle = "rgba(62,232,181,0.9)"; ctx.lineWidth = 1.5; ctx.stroke();
+      // ── transporter protein ──
+      // Two TM helices flanking a central pore
+      const midY = (memTop + memBot) / 2;
+      const helixH = (memBot - memTop) / 2 + 2;
+      [-transHW, transHW].forEach(dx => {
+        const g = ctx.createLinearGradient(cx + dx - 5, memTop, cx + dx + 5, memBot);
+        g.addColorStop(0, "rgba(62,232,181,0.70)");
+        g.addColorStop(1, "rgba(62,232,181,0.45)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.ellipse(cx + dx, midY, 5, helixH, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "rgba(62,232,181,0.90)"; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.ellipse(cx + dx, midY, 5, helixH, 0, 0, Math.PI * 2); ctx.stroke();
+      });
+      // pore opening indicators
+      ctx.strokeStyle = "rgba(62,232,181,0.22)"; ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath(); ctx.moveTo(cx, memTop + 2); ctx.lineTo(cx, memBot - 2); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(62,232,181,0.38)"; ctx.font = "7px sans-serif";
+      ctx.textAlign = "center"; ctx.fillText("transporter", cx, memBot + 11); ctx.textAlign = "left";
 
-      // substrate molecule above
-      const sx = tx + Math.cos(t * 1.8) * 7;
-      const sy = H / 2 - 29 + Math.sin(t * 1.4) * 4;
-      ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,107,107,0.8)"; ctx.fill();
+      // ── passing drug molecules ──
+      passers.forEach(p => {
+        p.prog = (p.prog + p.speed) % 1.0;
+        const px = p.lane * W;
+        let py;
+        if (p.prog < 0.45) {
+          py = H * 0.06 + (memTop - H * 0.06) * (p.prog / 0.45);
+        } else if (p.prog < 0.55) {
+          // threading through membrane — converge to cx
+          const frac = (p.prog - 0.45) / 0.10;
+          const blendX = px + (cx - px) * frac;
+          py = memTop + (memBot - memTop) * frac;
+          // draw at blended x
+          ctx.beginPath(); ctx.arc(blendX, py, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(62,232,181,0.85)"; ctx.fill();
+          return;
+        } else {
+          const frac = (p.prog - 0.55) / 0.45;
+          const blendX = cx + (px - cx) * frac;
+          py = memBot + (H * 0.94 - memBot) * frac;
+          ctx.beginPath(); ctx.arc(blendX, py, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(62,232,181,0.70)"; ctx.fill();
+          return;
+        }
+        ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(62,232,181,0.85)"; ctx.fill();
+      });
+
+      // ── blocked molecules (bounce at membrane top) ──
+      blockers.forEach(b => {
+        const bx = b.x * W;
+        const by = memTop - 8 - 6 * Math.abs(Math.sin(t * 0.9 + b.phase));
+        ctx.beginPath(); ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,107,107,0.80)"; ctx.fill();
+        // bounce arrow
+        if (Math.sin(t * 0.9 + b.phase) < -0.7) {
+          ctx.strokeStyle = "rgba(255,107,107,0.45)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(bx, by - 5); ctx.lineTo(bx, by - 10); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(bx - 3, by - 8); ctx.lineTo(bx, by - 12); ctx.lineTo(bx + 3, by - 8); ctx.stroke();
+        }
+      });
 
       raf = requestAnimationFrame(draw);
     }
@@ -284,6 +376,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ── CYTOKINE–RECEPTOR DOCKING ────────────────────────────────────────────
+  // Shows: cell membrane at bottom, Y-shaped receptor arms, cytokine (4-helix
+  // bundle) oscillating down, snapping into binding groove, then releasing.
   function dock(canvas) {
     const ctx = canvas.getContext("2d");
     fit(canvas);
@@ -291,29 +385,96 @@ document.addEventListener("DOMContentLoaded", function () {
     function draw() {
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
-      t += 0.012;
-      const cx = W / 2, cy = H / 2;
-      const approach = (Math.sin(t * 0.4) + 1) / 2;
-      const dist = 36 - 14 * approach;
+      t += 0.011;
 
-      // binding bridge
-      if (approach > 0.7) {
-        const a = (approach - 0.7) / 0.3;
-        ctx.strokeStyle = `rgba(62,232,181,${a * 0.45})`; ctx.lineWidth = 3 * a;
-        ctx.beginPath(); ctx.moveTo(cx - dist + 10, cy); ctx.lineTo(cx + dist - 10, cy); ctx.stroke();
-        ctx.beginPath(); ctx.arc(cx, cy, 16 * a, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(62,232,181,${a * 0.25})`; ctx.lineWidth = 8 * a; ctx.stroke();
+      const cx = W / 2;
+      const memY  = H * 0.80;          // cell membrane y
+      const armH  = H * 0.30;          // receptor arm height above membrane
+      const armW  = W * 0.12;          // half-distance between receptor arms
+
+      // ── cell membrane ──
+      ctx.fillStyle = "rgba(123,97,255,0.12)";
+      ctx.fillRect(0, memY, W, H - memY);
+      ctx.strokeStyle = "rgba(123,97,255,0.50)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(0, memY); ctx.lineTo(W, memY); ctx.stroke();
+      // lipid tails
+      for (let i = 0; i < Math.floor(W / 14); i++) {
+        const tx = (i + 0.5) * (W / Math.floor(W / 14));
+        ctx.strokeStyle = "rgba(123,97,255,0.20)"; ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(tx, memY); ctx.lineTo(tx, memY + 8); ctx.stroke();
       }
 
-      // receptor
-      ctx.fillStyle = "rgba(123,97,255,0.5)";
-      ctx.beginPath(); ctx.ellipse(cx + dist, cy, 10, 18, 0.3, 0, Math.PI * 2);
-      ctx.fill(); ctx.strokeStyle = "rgba(123,97,255,0.85)"; ctx.lineWidth = 1.5; ctx.stroke();
+      // ── receptor arms (Y shape) ──
+      const rtop = memY - armH;
+      // stem from membrane
+      ctx.strokeStyle = "rgba(123,97,255,0.70)"; ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(cx, memY); ctx.lineTo(cx, memY - armH * 0.40); ctx.stroke();
+      // left arm
+      ctx.beginPath(); ctx.moveTo(cx, memY - armH * 0.40);
+      ctx.lineTo(cx - armW, rtop); ctx.stroke();
+      // right arm
+      ctx.beginPath(); ctx.moveTo(cx, memY - armH * 0.40);
+      ctx.lineTo(cx + armW, rtop); ctx.stroke();
+      ctx.lineCap = "butt";
+      // arm caps (binding epitopes)
+      ctx.fillStyle = "rgba(123,97,255,0.85)";
+      [[cx - armW, rtop], [cx + armW, rtop]].forEach(([rx, ry]) => {
+        ctx.beginPath(); ctx.arc(rx, ry, 4.5, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.fillStyle = "rgba(123,97,255,0.40)";
+      ctx.font = "8px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("receptor", cx, memY + H * 0.12);
+      ctx.textAlign = "left";
 
-      // cytokine
-      ctx.fillStyle = "rgba(62,232,181,0.5)";
-      ctx.beginPath(); ctx.ellipse(cx - dist, cy, 14, 10, -0.2, 0, Math.PI * 2);
-      ctx.fill(); ctx.strokeStyle = "rgba(62,232,181,0.85)"; ctx.lineWidth = 1.5; ctx.stroke();
+      // ── cytokine binding cycle ──
+      // Cycle: 0–0.45 approach, 0.45–0.70 bound+glow, 0.70–1.0 release
+      const period = Math.PI * 2 * 2.2;   // ~14 s cycle
+      const phase  = (t % period) / period; // 0–1
+
+      let cyY;
+      const topY   = H * 0.06;
+      const boundY = rtop + 4;             // just touching receptor
+      if (phase < 0.45) {
+        cyY = topY + (boundY - topY) * (phase / 0.45);
+      } else if (phase < 0.70) {
+        cyY = boundY + 1.5 * Math.sin((phase - 0.45) / 0.25 * Math.PI * 4);
+      } else {
+        cyY = boundY + (topY - boundY) * ((phase - 0.70) / 0.30);
+      }
+      const bound  = phase >= 0.45 && phase < 0.70;
+      const cyCol  = "62,232,181";
+
+      // binding energy flash
+      if (bound) {
+        const a = 0.12 + 0.12 * Math.sin(t * 10);
+        ctx.beginPath(); ctx.arc(cx, cyY, 24, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${cyCol},${a})`; ctx.fill();
+        // H-bond dashes to arm caps
+        ctx.strokeStyle = `rgba(${cyCol},0.38)`; ctx.lineWidth = 1.2;
+        ctx.setLineDash([3, 3]);
+        [[cx - armW, rtop], [cx + armW, rtop]].forEach(([rx, ry]) => {
+          ctx.beginPath(); ctx.moveTo(cx, cyY); ctx.lineTo(rx, ry); ctx.stroke();
+        });
+        ctx.setLineDash([]);
+      }
+
+      // cytokine body (4-helix bundle)
+      const helixPos = [[-7, -6], [7, -6], [-7, 6], [7, 6]];
+      helixPos.forEach(([dx, dy]) => {
+        ctx.fillStyle = `rgba(${cyCol},0.55)`;
+        ctx.beginPath(); ctx.ellipse(cx + dx, cyY + dy, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
+      });
+      // core
+      ctx.beginPath(); ctx.arc(cx, cyY, 6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${cyCol},0.7)`; ctx.fill();
+      ctx.strokeStyle = `rgba(${cyCol},0.95)`; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, cyY, 12, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.fillStyle = `rgba(${cyCol},0.50)`;
+      ctx.font = "8px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("cytokine", cx, cyY - 17);
+      ctx.textAlign = "left";
 
       raf = requestAnimationFrame(draw);
     }
@@ -424,7 +585,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       ctx.fillStyle = "rgba(62,232,181,0.05)";
       ctx.fillRect(0, cy - ch / 2, W, ch);
-      ["top","bot"].forEach((s, i) => {
+      [0, 1].forEach((_, i) => {
         ctx.strokeStyle = "rgba(62,232,181,0.18)"; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(0, cy + (i ? ch / 2 : -ch / 2));
         ctx.lineTo(W, cy + (i ? ch / 2 : -ch / 2)); ctx.stroke();

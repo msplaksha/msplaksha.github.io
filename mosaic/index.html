@@ -66,14 +66,14 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script>
-(function () {
+window.addEventListener("load", function () {
   const canvas = document.getElementById("mol-bg");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
   function resize() {
-    canvas.width  = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width  = canvas.offsetWidth  || canvas.parentElement.offsetWidth || 800;
+    canvas.height = canvas.offsetHeight || canvas.parentElement.offsetHeight || 400;
   }
   resize();
   window.addEventListener("resize", resize);
