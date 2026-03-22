@@ -65,7 +65,621 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
 });
 </script>
+<script>/* MOSAIC Lab — Research page canvas animations
+   Theme banners: dna | nn | omics
+   Project cards: membrane | dock | allosteric | xai | flow | ecg | gene_net | scan | dna_seq
+*/
+(function () {
+  "use strict";
 
+  function fit(c) {
+    c.width  = c.offsetWidth  || c.parentElement.offsetWidth  || 400;
+    c.height = c.offsetHeight || 160;
+  }
+
+  // ── DNA DOUBLE HELIX ──────────────────────────────────────────────────────
+  function dna(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let phase = 0, raf;
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      phase += 0.018;
+      const N    = Math.max(10, Math.floor(W / 30));
+      const xStp = W / (N - 1);
+      const amp  = H * 0.34;
+      const cy   = H / 2;
+
+      // base-pair bridges
+      for (let i = 0; i < N; i++) {
+        const x  = i * xStp;
+        const y1 = cy + amp * Math.sin(phase + i * 0.72);
+        const y2 = cy + amp * Math.sin(phase + i * 0.72 + Math.PI);
+        const a  = 0.12 + 0.18 * (1 - Math.abs(y1 - y2) / (2 * amp));
+        ctx.strokeStyle = `rgba(180,160,255,${a})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke();
+      }
+
+      // strand 1 (purple)
+      ctx.beginPath(); ctx.strokeStyle = "rgba(123,97,255,0.78)"; ctx.lineWidth = 2.5;
+      for (let i = 0; i < N; i++) {
+        const x = i * xStp, y = cy + amp * Math.sin(phase + i * 0.72);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // strand 2 (teal)
+      ctx.beginPath(); ctx.strokeStyle = "rgba(62,232,181,0.78)"; ctx.lineWidth = 2.5;
+      for (let i = 0; i < N; i++) {
+        const x = i * xStp, y = cy + amp * Math.sin(phase + i * 0.72 + Math.PI);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // nucleotide dots
+      for (let i = 0; i < N; i++) {
+        const x  = i * xStp;
+        const y1 = cy + amp * Math.sin(phase + i * 0.72);
+        const y2 = cy + amp * Math.sin(phase + i * 0.72 + Math.PI);
+        ctx.beginPath(); ctx.arc(x, y1, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(123,97,255,0.9)"; ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y2, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(62,232,181,0.9)"; ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── NEURAL NETWORK ACTIVATION ────────────────────────────────────────────
+  function nn(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    const W = canvas.width, H = canvas.height;
+    const layers = [
+      [W * 0.10, [0.20, 0.50, 0.80].map(y => y * H)],
+      [W * 0.33, [0.15, 0.37, 0.58, 0.80].map(y => y * H)],
+      [W * 0.58, [0.20, 0.50, 0.80].map(y => y * H)],
+      [W * 0.83, [0.32, 0.68].map(y => y * H)],
+    ];
+    let activeLayer = 0, frame = 0, raf;
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      frame++;
+      if (frame % 28 === 0) activeLayer = (activeLayer + 1) % (layers.length + 2);
+
+      // edges
+      for (let li = 0; li < layers.length - 1; li++) {
+        const [x1, ys1] = layers[li], [x2, ys2] = layers[li + 1];
+        const act = activeLayer > li;
+        for (const y1 of ys1) for (const y2 of ys2) {
+          ctx.strokeStyle = act ? "rgba(62,232,181,0.38)" : "rgba(62,232,181,0.07)";
+          ctx.lineWidth   = act ? 1.2 : 0.6;
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        }
+      }
+
+      // nodes
+      for (let li = 0; li < layers.length; li++) {
+        const [x, ys] = layers[li];
+        const act = activeLayer > li - 1;
+        for (const y of ys) {
+          if (act) {
+            ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(62,232,181,0.10)"; ctx.fill();
+          }
+          ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = act ? "rgba(62,232,181,0.9)" : "rgba(62,232,181,0.2)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(62,232,181,0.4)"; ctx.lineWidth = 1; ctx.stroke();
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── OMICS CONCENTRIC RINGS ───────────────────────────────────────────────
+  function omics(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.006;
+      const cx = W / 2, cy = H / 2;
+      const maxR = Math.min(W, H) * 0.42;
+      const lyrDefs = [
+        { r: maxR,        n: 10, col: "255,107,107", spd:  0.20 },
+        { r: maxR * 0.62, n:  7, col: "255,140, 80", spd: -0.35 },
+        { r: maxR * 0.30, n:  4, col: "255,180, 60", spd:  0.55 },
+      ];
+
+      const allNodes = lyrDefs.map(l =>
+        Array.from({ length: l.n }, (_, i) => {
+          const a = (i / l.n) * Math.PI * 2 + t * l.spd;
+          return { x: cx + l.r * Math.cos(a), y: cy + l.r * Math.sin(a), col: l.col };
+        })
+      );
+
+      // cross-layer edges
+      [[0, 1], [1, 2]].forEach(([oi, ii]) => {
+        allNodes[oi].forEach((n, i) => {
+          if (i % 2 !== 0) return;
+          const m = allNodes[ii][i % allNodes[ii].length];
+          ctx.strokeStyle = `rgba(255,120,80,${0.07 + 0.10 * Math.sin(t * 2 + i)})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(m.x, m.y); ctx.stroke();
+        });
+      });
+
+      // ring guides
+      lyrDefs.forEach(l => {
+        ctx.beginPath(); ctx.arc(cx, cy, l.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${l.col},0.07)`; ctx.lineWidth = 1; ctx.stroke();
+      });
+
+      // nodes
+      allNodes.flat().forEach(n => {
+        const p = 1 + 0.25 * Math.sin(t * 3 + n.x * 0.05);
+        ctx.beginPath(); ctx.arc(n.x, n.y, 4 * p, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${n.col},0.75)`; ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── MEMBRANE / BBB TRANSPORT ─────────────────────────────────────────────
+  function membrane(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.012;
+      const y1 = H * 0.35, y2 = H * 0.65;
+
+      // membrane band
+      ctx.fillStyle = "rgba(123,97,255,0.07)";
+      ctx.fillRect(0, y1, W, y2 - y1);
+      ["rgba(123,97,255,0.22)", "rgba(123,97,255,0.22)"].forEach((c, i) => {
+        ctx.strokeStyle = c; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(0, i ? y2 : y1); ctx.lineTo(W, i ? y2 : y1); ctx.stroke();
+      });
+
+      // lipid tails
+      const nL = Math.floor(W / 20);
+      for (let i = 0; i < nL; i++) {
+        const x = (i + 0.5) * (W / nL);
+        ctx.strokeStyle = "rgba(123,97,255,0.28)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y1 + 11); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, y2); ctx.lineTo(x, y2 - 11); ctx.stroke();
+      }
+
+      // transporter (sweeps left-right)
+      const tx = ((Math.sin(t * 0.4) + 1) / 2) * W;
+      ctx.fillStyle = "rgba(62,232,181,0.55)";
+      ctx.beginPath(); ctx.ellipse(tx, H / 2, 11, 20, 0, 0, Math.PI * 2);
+      ctx.fill(); ctx.strokeStyle = "rgba(62,232,181,0.9)"; ctx.lineWidth = 1.5; ctx.stroke();
+
+      // substrate molecule above
+      const sx = tx + Math.cos(t * 1.8) * 7;
+      const sy = H / 2 - 29 + Math.sin(t * 1.4) * 4;
+      ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,107,107,0.8)"; ctx.fill();
+
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── CYTOKINE–RECEPTOR DOCKING ────────────────────────────────────────────
+  function dock(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.012;
+      const cx = W / 2, cy = H / 2;
+      const approach = (Math.sin(t * 0.4) + 1) / 2;
+      const dist = 36 - 14 * approach;
+
+      // binding bridge
+      if (approach > 0.7) {
+        const a = (approach - 0.7) / 0.3;
+        ctx.strokeStyle = `rgba(62,232,181,${a * 0.45})`; ctx.lineWidth = 3 * a;
+        ctx.beginPath(); ctx.moveTo(cx - dist + 10, cy); ctx.lineTo(cx + dist - 10, cy); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, 16 * a, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(62,232,181,${a * 0.25})`; ctx.lineWidth = 8 * a; ctx.stroke();
+      }
+
+      // receptor
+      ctx.fillStyle = "rgba(123,97,255,0.5)";
+      ctx.beginPath(); ctx.ellipse(cx + dist, cy, 10, 18, 0.3, 0, Math.PI * 2);
+      ctx.fill(); ctx.strokeStyle = "rgba(123,97,255,0.85)"; ctx.lineWidth = 1.5; ctx.stroke();
+
+      // cytokine
+      ctx.fillStyle = "rgba(62,232,181,0.5)";
+      ctx.beginPath(); ctx.ellipse(cx - dist, cy, 14, 10, -0.2, 0, Math.PI * 2);
+      ctx.fill(); ctx.strokeStyle = "rgba(62,232,181,0.85)"; ctx.lineWidth = 1.5; ctx.stroke();
+
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── ALLOSTERIC CONFORMATIONAL CHANGE ────────────────────────────────────
+  function allosteric(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.014;
+      const cx = W / 2, cy = H / 2;
+      const m = (Math.sin(t * 0.55) + 1) / 2; // morph 0→1
+
+      const domains = [
+        { bx: -28, by: -8,          rx: 18 - 4 * m, ry: 14 + 4 * m },
+        { bx:   5, by:  5 * m - 2,  rx: 22,         ry: 16 - 3 * m },
+        { bx:  33, by:  8 - 8 * m,  rx: 16 + 3 * m, ry: 20 - 5 * m },
+      ];
+      domains.forEach(d => {
+        ctx.fillStyle = "rgba(123,97,255,0.28)";
+        ctx.beginPath(); ctx.ellipse(cx + d.bx, cy + d.by, d.rx, d.ry, 0, 0, Math.PI * 2);
+        ctx.fill(); ctx.strokeStyle = "rgba(123,97,255,0.72)"; ctx.lineWidth = 1.5; ctx.stroke();
+      });
+
+      // effector
+      const ex = cx + 33 + 19, ey = cy + 8 - 8 * m;
+      ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,107,107,0.85)"; ctx.fill();
+
+      // dashed signal arrow
+      if (m > 0.4) {
+        const a = (m - 0.4) / 0.6;
+        ctx.strokeStyle = `rgba(255,107,107,${a * 0.55})`; ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(cx - 28, cy - 8); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── SHAP / XAI FEATURE BARS ──────────────────────────────────────────────
+  function xai(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    const feats = ["H-bond", "Hydro", "Charge", "Turn", "Mass", "pKa", "ASA", "SS"];
+    const base  = [0.82, 0.65, 0.71, 0.58, 0.44, 0.77, 0.39, 0.61];
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.009;
+      const barW = W / (feats.length + 0.5);
+      const maxH = H * 0.60;
+
+      feats.forEach((f, i) => {
+        const val = base[i] * (0.86 + 0.14 * Math.sin(t * 1.5 + i));
+        const bh  = val * maxH;
+        const x   = (i + 0.25) * barW;
+        const y   = H - bh - H * 0.10;
+        const col = val > 0.65 ? "62,232,181" : "123,97,255";
+
+        ctx.fillStyle = `rgba(${col},${0.28 + val * 0.42})`;
+        ctx.fillRect(x, y, barW * 0.7, bh);
+
+        if (val > 0.65) {
+          ctx.fillStyle = `rgba(${col},0.85)`;
+          ctx.fillRect(x, y - 3, barW * 0.7, 3);
+        }
+
+        ctx.fillStyle = `rgba(${col},0.55)`;
+        ctx.font = "9px monospace";
+        ctx.save(); ctx.translate(x + barW * 0.35, H - H * 0.03);
+        ctx.rotate(-Math.PI / 4); ctx.fillText(f, 0, 0); ctx.restore();
+      });
+
+      ctx.fillStyle = "rgba(62,232,181,0.45)";
+      ctx.font = "9px monospace"; ctx.fillText("SHAP", 4, 11);
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── HEPCIDIN IRON-CHANNEL GATE ───────────────────────────────────────────
+  function flow(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    const particles = Array.from({ length: 18 }, (_, i) => ({
+      x: Math.random(), phase: Math.random() * Math.PI * 2,
+      size: 2.5 + Math.random() * 1.8, blocked: i >= 10,
+    }));
+
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.012;
+      const cy = H / 2, ch = H * 0.30;
+
+      ctx.fillStyle = "rgba(62,232,181,0.05)";
+      ctx.fillRect(0, cy - ch / 2, W, ch);
+      ["top","bot"].forEach((s, i) => {
+        ctx.strokeStyle = "rgba(62,232,181,0.18)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, cy + (i ? ch / 2 : -ch / 2));
+        ctx.lineTo(W, cy + (i ? ch / 2 : -ch / 2)); ctx.stroke();
+      });
+
+      // hepcidin gate
+      const gx = W * 0.56;
+      ctx.strokeStyle = "rgba(255,107,107,0.75)"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(gx, cy - ch / 2 - 5); ctx.lineTo(gx, cy + ch / 2 + 5); ctx.stroke();
+      ctx.fillStyle = "rgba(255,107,107,0.55)";
+      ctx.font = "9px sans-serif"; ctx.fillText("Hep", gx + 4, cy - ch / 2 - 7);
+
+      // particles
+      particles.forEach((p) => {
+        if (!p.blocked) { p.x += 0.0028; if (p.x > 1) p.x = 0; }
+        const px = p.x * W;
+        if (p.blocked && px > gx - 8) {
+          const ox = gx - 16 - (p.phase * 6) + Math.sin(t * 2 + p.phase) * 3;
+          const py = cy + (p.phase - Math.PI * 0.5) * (ch * 0.65);
+          ctx.beginPath(); ctx.arc(ox, py, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255,107,107,0.65)"; ctx.fill();
+        } else {
+          const py = cy + Math.sin(t + p.phase) * (ch * 0.32);
+          ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(62,232,181,0.75)"; ctx.fill();
+        }
+      });
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── ECG TRACE — CARDIAC OMICS ────────────────────────────────────────────
+  function ecg(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.018;
+      const cy = H * 0.55;
+
+      // faint grid
+      ctx.strokeStyle = "rgba(255,107,107,0.07)"; ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 20) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 20) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+      ctx.beginPath(); ctx.strokeStyle = "rgba(255,107,107,0.88)"; ctx.lineWidth = 1.8;
+      for (let px = 0; px <= W; px++) {
+        const xn = (px / W + t * 0.22) % 1;
+        let y;
+        if      (xn < 0.10) y = cy - 6  * Math.sin(xn / 0.10 * Math.PI);
+        else if (xn < 0.17) y = cy + 4  * Math.sin((xn - 0.10) / 0.07 * Math.PI);
+        else if (xn < 0.20) y = cy - 42 * Math.sin((xn - 0.17) / 0.03 * Math.PI);
+        else if (xn < 0.27) y = cy + 11 * Math.sin((xn - 0.20) / 0.07 * Math.PI);
+        else if (xn < 0.55) y = cy - 13 * Math.sin((xn - 0.27) / 0.28 * Math.PI);
+        else                 y = cy;
+        px === 0 ? ctx.moveTo(px, y) : ctx.lineTo(px, y);
+      }
+      ctx.stroke();
+
+      // scrolling cursor
+      const curX = ((t * 0.22) % 1) * W;
+      ctx.strokeStyle = "rgba(255,107,107,0.38)"; ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(curX, 0); ctx.lineTo(curX, H); ctx.stroke();
+      ctx.setLineDash([]);
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── ALS GENE NETWORK ─────────────────────────────────────────────────────
+  function gene_net(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    const W0 = canvas.width, H0 = canvas.height;
+    const N   = 20;
+    const nodes = Array.from({ length: N }, (_, i) => ({
+      x: (0.08 + Math.random() * 0.84) * W0,
+      y: (0.08 + Math.random() * 0.84) * H0,
+      rescue: i < 4,
+      phase:  Math.random() * Math.PI * 2,
+    }));
+    const edges = [];
+    for (let i = 0; i < N; i++)
+      for (let j = i + 1; j < N; j++) {
+        const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+        if (Math.sqrt(dx*dx + dy*dy) < W0 * 0.38 && Math.random() < 0.28)
+          edges.push([i, j]);
+      }
+    let t = 0, raf;
+
+    function draw() {
+      ctx.clearRect(0, 0, W0, H0);
+      t += 0.010;
+
+      edges.forEach(([i, j]) => {
+        const sig = (nodes[i].rescue || nodes[j].rescue) ? 0.45 : 0.08;
+        ctx.strokeStyle = `rgba(255,107,107,${sig * (0.7 + 0.3 * Math.sin(t*2+i))})`;
+        ctx.lineWidth   = (nodes[i].rescue && nodes[j].rescue) ? 1.6 : 0.8;
+        ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+      });
+
+      nodes.forEach(n => {
+        const pulse = 1 + (n.rescue ? 0.35 : 0.10) * Math.sin(t * 2 + n.phase);
+        const r = (n.rescue ? 7 : 3.5) * pulse;
+        if (n.rescue) {
+          ctx.beginPath(); ctx.arc(n.x, n.y, r + 7, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255,107,107,0.10)"; ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = n.rescue ? "rgba(255,107,107,0.9)" : "rgba(255,107,107,0.22)";
+        ctx.fill();
+      });
+      ctx.fillStyle = "rgba(255,107,107,0.45)"; ctx.font = "9px sans-serif";
+      ctx.fillText("rescue candidates", 4, 11);
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── HISTOPATHOLOGY SCAN ──────────────────────────────────────────────────
+  function scan(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    const W0 = canvas.width, H0 = canvas.height;
+    const cells = Array.from({ length: 26 }, () => ({
+      x:    Math.random() * W0,
+      y:    Math.random() * H0,
+      r:    5 + Math.random() * 8,
+      type: Math.random() < 0.22 ? "ab" : "nm",
+    }));
+    let t = 0, raf;
+
+    function draw() {
+      ctx.clearRect(0, 0, W0, H0);
+      t += 0.010;
+
+      // cells
+      cells.forEach(c => {
+        ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        if (c.type === "ab") {
+          ctx.fillStyle = "rgba(255,107,107,0.30)"; ctx.strokeStyle = "rgba(255,107,107,0.65)";
+        } else {
+          ctx.fillStyle = "rgba(123,97,255,0.14)"; ctx.strokeStyle = "rgba(123,97,255,0.38)";
+        }
+        ctx.lineWidth = 1; ctx.fill(); ctx.stroke();
+      });
+
+      // scanning beam
+      const sx = ((t * 0.18) % 1.3 - 0.15) * W0;
+      if (sx > 0 && sx < W0) {
+        const g = ctx.createLinearGradient(sx - 24, 0, sx + 24, 0);
+        g.addColorStop(0, "rgba(62,232,181,0)");
+        g.addColorStop(0.5, "rgba(62,232,181,0.28)");
+        g.addColorStop(1, "rgba(62,232,181,0)");
+        ctx.fillStyle = g; ctx.fillRect(sx - 24, 0, 48, H0);
+        ctx.strokeStyle = "rgba(62,232,181,0.72)"; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H0); ctx.stroke();
+
+        cells.forEach(c => {
+          if (Math.abs(c.x - sx) < 26) {
+            ctx.beginPath(); ctx.arc(c.x, c.y, c.r + 4, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(${c.type === "ab" ? "255,107,107" : "62,232,181"},0.82)`;
+            ctx.lineWidth = 2; ctx.stroke();
+            if (c.type === "ab") {
+              ctx.fillStyle = "rgba(255,107,107,0.9)"; ctx.font = "8px sans-serif";
+              ctx.fillText("!", c.x - 2, c.y - c.r - 3);
+            }
+          }
+        });
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── DNA SEQUENCE / CANCER VARIANT ────────────────────────────────────────
+  function dna_seq(canvas) {
+    const ctx = canvas.getContext("2d");
+    fit(canvas);
+    let t = 0, raf;
+    const seq     = "ATCGATCGATCGCATCGATCGA";
+    const varPos  = 12;
+    const colMap  = { A: "62,232,181", T: "123,97,255", C: "255,107,107", G: "255,180,60" };
+
+    function draw() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      t += 0.010;
+      const n    = seq.length;
+      const cw   = W / (n + 1);
+      const cy   = H / 2;
+
+      // backbone strands
+      ctx.strokeStyle = "rgba(200,200,220,0.18)"; ctx.lineWidth = 1.5;
+      [[cy - 18], [cy + 18]].forEach(([y]) => {
+        ctx.beginPath(); ctx.moveTo(cw * 0.5, y); ctx.lineTo(W - cw * 0.5, y); ctx.stroke();
+      });
+
+      for (let i = 0; i < n; i++) {
+        const x   = (i + 1) * cw;
+        const b   = seq[i];
+        const col = colMap[b] || "200,200,200";
+        const iv  = i === varPos;
+        const p   = iv ? 1.5 + 0.5 * Math.sin(t * 3) : 1;
+        const r   = (iv ? 7 : 5) * p;
+
+        // base-pair connector
+        ctx.strokeStyle = `rgba(${col},0.18)`; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, cy - 14); ctx.lineTo(x, cy + 14); ctx.stroke();
+
+        // glow ring for variant
+        if (iv) {
+          ctx.beginPath(); ctx.arc(x, cy, r + 9, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255,107,107,${0.18 + 0.18 * Math.sin(t * 3)})`;
+          ctx.lineWidth = 4; ctx.stroke();
+        }
+
+        ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${col},${iv ? 0.92 : 0.58})`; ctx.fill();
+
+        ctx.fillStyle = `rgba(${col},0.75)`; ctx.font = `${iv ? 10 : 8}px monospace`;
+        ctx.textAlign = "center"; ctx.fillText(b, x, cy + r + 10);
+      }
+      ctx.textAlign = "left";
+
+      const vx = (varPos + 1) * cw;
+      ctx.fillStyle = "rgba(255,107,107,0.8)"; ctx.font = "9px sans-serif";
+      ctx.textAlign = "center"; ctx.fillText("variant", vx, cy - 33);
+      ctx.textAlign = "left";
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    canvas._stop = () => cancelAnimationFrame(raf);
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────────────────
+  const animMap = { dna, nn, omics, membrane, dock, allosteric, xai, flow, ecg, gene_net, scan, dna_seq };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".anim-canvas").forEach(canvas => {
+      const type = canvas.dataset.anim;
+      const fn   = animMap[type];
+      if (fn) { canvas._animFn = fn; fn(canvas); }
+    });
+  });
+})();
+</script>
 <body>
 <div class="container">
 
@@ -159,9 +773,11 @@ document.addEventListener("DOMContentLoaded", function () {
     <h3 class="theme-title" style="color:var(--accent1)">Structural Bioinformatics &amp; Biomolecular Dynamics</h3>
     <p class="theme-tagline">Atomic-level characterization and thermodynamic profiling of biological macromolecules using MD simulations and enhanced sampling.</p>
   </div>
+  <canvas class="anim-canvas theme-banner-canvas" data-anim="dna"></canvas>
   <div class="theme-projects-grid">
     
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="membrane"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent1)">
             <div class="funding-badge">DBT, GoI</div>
             <h4 class="theme-project-title">Decoding the Neurovascular Unit &amp; Blood-Brain Barrier</h4>
@@ -169,6 +785,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="dock"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent1)">
             <div class="funding-badge">SERB (ANRF), GoI</div>
             <h4 class="theme-project-title">Structural Cytokine Engineering for Immunotherapeutics</h4>
@@ -176,6 +793,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="allosteric"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent1)">
             <div class="funding-badge">Internal</div>
             <h4 class="theme-project-title">Allosteric Regulation in Transcriptional Repressors</h4>
@@ -189,9 +807,11 @@ document.addEventListener("DOMContentLoaded", function () {
     <h3 class="theme-title" style="color:var(--accent2)">AI-Augmented Therapeutics &amp; Peptide Engineering</h3>
     <p class="theme-tagline">Closed-loop, data-driven pipelines integrating explainable AI with biophysical featurization to navigate chemical space for novel therapeutic agents.</p>
   </div>
+  <canvas class="anim-canvas theme-banner-canvas" data-anim="nn"></canvas>
   <div class="theme-projects-grid">
     
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="xai"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent2)">
             <div class="funding-badge">ICMR</div>
             <h4 class="theme-project-title">Innovating Peptide Discovery through Explainable AI</h4>
@@ -199,6 +819,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="flow"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent2)">
             <div class="funding-badge">Internal</div>
             <h4 class="theme-project-title">Hepcidin-Targeted Therapeutics for Iron Disorder</h4>
@@ -212,9 +833,11 @@ document.addEventListener("DOMContentLoaded", function () {
     <h3 class="theme-title" style="color:var(--accent3)">Systems Biology &amp; Multi-Omics Biomarker Discovery</h3>
     <p class="theme-tagline">Integrating large-scale heterogeneous datasets to reconstruct dysregulated pathways, stratify disease risk, and automate diagnostics. Clinical partners: PGIMER, Chandigarh.</p>
   </div>
+  <canvas class="anim-canvas theme-banner-canvas" data-anim="omics"></canvas>
   <div class="theme-projects-grid">
     
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="ecg"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent3)">
             <div class="funding-badge">ICMR, GoI</div>
             <h4 class="theme-project-title">Precision Biomarkers in Acute Coronary Syndrome</h4>
@@ -222,6 +845,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="gene_net"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent3)">
             <div class="funding-badge">Plaksha University</div>
             <h4 class="theme-project-title">Rescue Candidates in Amyotrophic Lateral Sclerosis</h4>
@@ -229,6 +853,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="scan"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent3)">
             <div class="funding-badge">Plaksha University</div>
             <h4 class="theme-project-title">AI-Driven Digital Histopathology — AISAP</h4>
@@ -236,6 +861,7 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
         <div class="theme-project-card reveal">
+          <canvas class="anim-canvas project-canvas" data-anim="dna_seq"></canvas>
           <div class="theme-project-inner" style="border-left-color:var(--accent3)">
             <div class="funding-badge">Plaksha University</div>
             <h4 class="theme-project-title">Indigenous Oncology Mutation Hotspots</h4>
