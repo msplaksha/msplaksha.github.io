@@ -483,41 +483,114 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ── ALLOSTERIC CONFORMATIONAL CHANGE ────────────────────────────────────
+  // State machine: APO → effector APPROACH → BOUND → SIGNAL propagation
+  //                → active site CLOSED (enzyme inactive) → RELEASE → APO
   function allosteric(canvas) {
     const ctx = canvas.getContext("2d");
     fit(canvas);
-    let t = 0, raf;
+    const STATES = ["apo", "approach", "bound", "propagate", "closed", "release"];
+    const DURS   = [ 90,    50,         28,      48,           78,       45  ];
+    let si = 0, sf = 0, raf;
+
     function draw() {
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
-      t += 0.014;
-      const cx = W / 2, cy = H / 2;
-      const m = (Math.sin(t * 0.55) + 1) / 2; // morph 0→1
+      sf++;
+      if (sf >= DURS[si]) { si = (si + 1) % STATES.length; sf = 0; }
+      const st  = STATES[si];
+      const fr  = sf / DURS[si];            // 0→1 within state
+      const cy  = H / 2;
+      const aDX = W * 0.20, bDX = W * 0.50, acDX = W * 0.80;
 
-      const domains = [
-        { bx: -28, by: -8,          rx: 18 - 4 * m, ry: 14 + 4 * m },
-        { bx:   5, by:  5 * m - 2,  rx: 22,         ry: 16 - 3 * m },
-        { bx:  33, by:  8 - 8 * m,  rx: 16 + 3 * m, ry: 20 - 5 * m },
-      ];
-      domains.forEach(d => {
-        ctx.fillStyle = "rgba(123,97,255,0.28)";
-        ctx.beginPath(); ctx.ellipse(cx + d.bx, cy + d.by, d.rx, d.ry, 0, 0, Math.PI * 2);
-        ctx.fill(); ctx.strokeStyle = "rgba(123,97,255,0.72)"; ctx.lineWidth = 1.5; ctx.stroke();
-      });
+      // ── compute morph values per state ──
+      let effFrac = 0, alloM = 0, sigX = -1, actM = 0;
+      if      (st === "approach")  { effFrac = fr; }
+      else if (st === "bound")     { effFrac = 1; alloM = fr; }
+      else if (st === "propagate") { effFrac = 1; alloM = 1; sigX = aDX + fr * (acDX - aDX); }
+      else if (st === "closed")    { effFrac = 1; alloM = 1; actM = fr; }
+      else if (st === "release")   { effFrac = 1 - fr; alloM = 1 - fr; actM = 1 - fr; }
 
-      // effector
-      const ex = cx + 33 + 19, ey = cy + 8 - 8 * m;
-      ctx.beginPath(); ctx.arc(ex, ey, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(255,107,107,0.85)"; ctx.fill();
+      // ── domain connectors ──
+      ctx.strokeStyle = "rgba(123,97,255,0.15)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(aDX + 20, cy); ctx.lineTo(bDX - 15, cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bDX + 15, cy); ctx.lineTo(acDX - 22, cy); ctx.stroke();
 
-      // dashed signal arrow
-      if (m > 0.4) {
-        const a = (m - 0.4) / 0.6;
-        ctx.strokeStyle = `rgba(255,107,107,${a * 0.55})`; ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(cx - 28, cy - 8); ctx.stroke();
-        ctx.setLineDash([]);
+      // ── signal wave marker ──
+      if (sigX > 0) {
+        ctx.beginPath(); ctx.arc(sigX, cy, 14, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,140,60,${0.20 + 0.14 * Math.sin(sf * 0.35)})`; ctx.fill();
       }
+
+      // ── allosteric domain (left) ──
+      const aRx = 20 - 4 * alloM, aRy = 15 + 5 * alloM;
+      const aY  = cy - 4 * alloM;
+      ctx.fillStyle = "rgba(123,97,255,0.24)";
+      ctx.beginPath(); ctx.ellipse(aDX, aY, aRx, aRy, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = `rgba(123,97,255,${0.58 + 0.32 * alloM})`; ctx.lineWidth = 1.5 + alloM;
+      ctx.beginPath(); ctx.ellipse(aDX, aY, aRx, aRy, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = "rgba(123,97,255,0.38)"; ctx.font = "7px sans-serif";
+      ctx.textAlign = "center"; ctx.fillText("allosteric", aDX, aY + aRy + 10); ctx.textAlign = "left";
+
+      // ── bridge domain (centre) ──
+      const bY = cy + (st === "propagate" ? 3 * Math.sin(Math.PI * fr) : 0);
+      ctx.fillStyle = "rgba(123,97,255,0.16)";
+      ctx.beginPath(); ctx.ellipse(bDX, bY, 14, 12, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "rgba(123,97,255,0.45)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(bDX, bY, 14, 12, 0, 0, Math.PI * 2); ctx.stroke();
+
+      // ── active site domain (right) ──
+      const acRx = 18 + 4 * actM, acRy = 22 - 8 * actM;
+      const acAng = actM * Math.PI * 0.28;
+      ctx.fillStyle = "rgba(123,97,255,0.24)";
+      ctx.beginPath(); ctx.ellipse(acDX, cy, acRx, acRy, acAng, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = `rgba(123,97,255,${0.58 + 0.32 * actM})`; ctx.lineWidth = 1.5 + actM;
+      ctx.beginPath(); ctx.ellipse(acDX, cy, acRx, acRy, acAng, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = "rgba(123,97,255,0.38)"; ctx.font = "7px sans-serif";
+      ctx.textAlign = "center"; ctx.fillText("active site", acDX, cy + acRy + 10); ctx.textAlign = "left";
+
+      // Active site groove (open when not closed)
+      if (actM < 0.80) {
+        const ga = (1 - actM / 0.80) * 0.55;
+        ctx.strokeStyle = `rgba(62,232,181,${ga})`; ctx.lineWidth = 2;
+        ctx.setLineDash([3, 2]);
+        ctx.beginPath(); ctx.arc(acDX + acRx * 0.55, cy, 7, -Math.PI * 0.65, Math.PI * 0.65);
+        ctx.stroke(); ctx.setLineDash([]);
+        // small substrate floats near open groove in APO state
+        if (st === "apo" || (st === "release" && fr < 0.6)) {
+          const sa = st === "apo" ? 0.55 : 0.55 * (1 - fr / 0.6);
+          const sx = acDX + acRx + 11 + 4 * Math.sin(sf * 0.07);
+          ctx.beginPath(); ctx.arc(sx, cy, 4, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(62,232,181,${sa})`; ctx.fill();
+          ctx.fillStyle = `rgba(62,232,181,${sa * 0.7})`; ctx.font = "6px sans-serif";
+          ctx.fillText("sub", sx - 4, cy + 10);
+        }
+      }
+
+      // ── effector molecule ──
+      if (effFrac > 0) {
+        const efX = -12 + effFrac * (aDX - aRx - 5 + 12);
+        const efY = aY - 6;
+        ctx.beginPath(); ctx.arc(efX, efY, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,107,107,0.85)"; ctx.fill();
+        ctx.strokeStyle = "rgba(255,107,107,1.0)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(efX, efY, 5.5, 0, Math.PI * 2); ctx.stroke();
+        if (effFrac > 0.90) {
+          ctx.strokeStyle = `rgba(255,107,107,${(effFrac - 0.9) / 0.1 * 0.38})`;
+          ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+          ctx.beginPath(); ctx.moveTo(efX + 5, efY); ctx.lineTo(aDX - aRx, aY); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        ctx.fillStyle = "rgba(255,107,107,0.48)"; ctx.font = "6px sans-serif";
+        ctx.textAlign = "center"; ctx.fillText("eff", efX, efY - 9); ctx.textAlign = "left";
+      }
+
+      // ── state label (top right) ──
+      const sLab = {apo:"APO",approach:"BINDING",bound:"BOUND",propagate:"SIGNAL ▶",closed:"INACTIVE",release:"RELEASE"};
+      const sCol = {apo:"123,97,255",approach:"255,180,60",bound:"255,107,107",propagate:"255,140,60",closed:"255,107,107",release:"62,232,181"};
+      ctx.fillStyle = `rgba(${sCol[st]},0.72)`;
+      ctx.font = "8px monospace"; ctx.textAlign = "right";
+      ctx.fillText(sLab[st], W - 4, 11); ctx.textAlign = "left";
+
       raf = requestAnimationFrame(draw);
     }
     draw();
@@ -769,60 +842,100 @@ document.addEventListener("DOMContentLoaded", function () {
     canvas._stop = () => cancelAnimationFrame(raf);
   }
 
-  // ── DNA SEQUENCE / CANCER VARIANT ────────────────────────────────────────
+  // ── CANCER VARIANT — IGV-STYLE READ PILEUP ───────────────────────────────
+  // Shows: reference track (top) → 7 sequencing reads stacked (pileup) →
+  // variant position highlighted with REF|ALT split → VAF counter →
+  // bottom: missense annotation + PATHOGENIC badge pulsing
   function dna_seq(canvas) {
     const ctx = canvas.getContext("2d");
     fit(canvas);
     let t = 0, raf;
-    const seq     = "ATCGATCGATCGCATCGATCGA";
-    const varPos  = 12;
-    const colMap  = { A: "62,232,181", T: "123,97,255", C: "255,107,107", G: "255,180,60" };
+    const refSeq  = "ATGCATCGA";         // 9-base window
+    const varIdx  = 4;                    // variant at centre
+    const refBase = "A", altBase = "T";
+    const colMap  = { A:"62,232,181", T:"123,97,255", C:"255,107,107", G:"255,180,60" };
+    // 7 reads: 3 alt, 4 ref  →  VAF = 3/7 ≈ 43%
+    const reads = [false, true, false, true, false, true, false]
+      .map((alt, i) => ({ alt, phase: i * 0.9 }));
 
     function draw() {
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
       t += 0.010;
-      const n    = seq.length;
-      const cw   = W / (n + 1);
-      const cy   = H / 2;
+      const n = refSeq.length, cw = W / (n + 1);
 
-      // backbone strands
-      ctx.strokeStyle = "rgba(200,200,220,0.18)"; ctx.lineWidth = 1.5;
-      [[cy - 18], [cy + 18]].forEach(([y]) => {
-        ctx.beginPath(); ctx.moveTo(cw * 0.5, y); ctx.lineTo(W - cw * 0.5, y); ctx.stroke();
-      });
+      // ── Reference track (top row) ──
+      const refY = H * 0.14;
+      ctx.strokeStyle = "rgba(200,200,220,0.12)"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cw * 0.5, refY); ctx.lineTo(W - cw * 0.5, refY); ctx.stroke();
 
       for (let i = 0; i < n; i++) {
-        const x   = (i + 1) * cw;
-        const b   = seq[i];
-        const col = colMap[b] || "200,200,200";
-        const iv  = i === varPos;
-        const p   = iv ? 1.5 + 0.5 * Math.sin(t * 3) : 1;
-        const r   = (iv ? 7 : 5) * p;
-
-        // base-pair connector
-        ctx.strokeStyle = `rgba(${col},0.18)`; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(x, cy - 14); ctx.lineTo(x, cy + 14); ctx.stroke();
-
-        // glow ring for variant
-        if (iv) {
-          ctx.beginPath(); ctx.arc(x, cy, r + 9, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255,107,107,${0.18 + 0.18 * Math.sin(t * 3)})`;
-          ctx.lineWidth = 4; ctx.stroke();
+        const x = (i + 1) * cw;
+        const isV = i === varIdx;
+        if (isV) {
+          // Split REF / ALT circles
+          const pulse = 1 + 0.22 * Math.sin(t * 3);
+          ctx.fillStyle = `rgba(${colMap[refBase]},0.62)`;
+          ctx.beginPath(); ctx.arc(x - 5, refY, 4.5 * pulse, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = `rgba(${colMap[altBase]},0.92)`;
+          ctx.beginPath(); ctx.arc(x + 5, refY, 4.5 * pulse, 0, Math.PI * 2); ctx.fill();
+          // glow ring
+          ctx.strokeStyle = `rgba(255,107,107,${0.22 + 0.18 * Math.sin(t * 3)})`; ctx.lineWidth = 1.8;
+          ctx.beginPath(); ctx.arc(x, refY, 13 * pulse, 0, Math.PI * 2); ctx.stroke();
+          // "SNV" label
+          ctx.fillStyle = "rgba(255,107,107,0.68)"; ctx.font = "6px monospace";
+          ctx.textAlign = "center"; ctx.fillText("SNV", x, refY - 10); ctx.textAlign = "left";
+        } else {
+          ctx.fillStyle = `rgba(${colMap[refSeq[i]]},0.48)`;
+          ctx.beginPath(); ctx.arc(x, refY, 4, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = `rgba(${colMap[refSeq[i]]},0.55)`; ctx.font = "6px monospace";
+          ctx.textAlign = "center"; ctx.fillText(refSeq[i], x, refY + 10); ctx.textAlign = "left";
         }
-
-        ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${col},${iv ? 0.92 : 0.58})`; ctx.fill();
-
-        ctx.fillStyle = `rgba(${col},0.75)`; ctx.font = `${iv ? 10 : 8}px monospace`;
-        ctx.textAlign = "center"; ctx.fillText(b, x, cy + r + 10);
       }
-      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(200,200,220,0.28)"; ctx.font = "6px monospace"; ctx.fillText("REF", 2, refY + 4);
 
-      const vx = (varPos + 1) * cw;
-      ctx.fillStyle = "rgba(255,107,107,0.8)"; ctx.font = "9px sans-serif";
-      ctx.textAlign = "center"; ctx.fillText("variant", vx, cy - 33);
+      // ── Read pileup ──
+      const pTop = H * 0.28, rH = 7, rG = 2;
+      reads.forEach((r, ri) => {
+        const ry = pTop + ri * (rH + rG);
+        ctx.fillStyle = `rgba(${r.alt ? "255,107,107" : "62,232,181"},0.10)`;
+        ctx.fillRect(cw * 0.5, ry, W - cw, rH);
+        for (let i = 0; i < n; i++) {
+          const bx = (i + 1) * cw;
+          const isV = i === varIdx;
+          const base = isV && r.alt ? altBase : refSeq[i];
+          const col  = colMap[base] || "200,200,220";
+          ctx.fillStyle = `rgba(${col},${isV ? (r.alt ? 0.90 : 0.65) : 0.38})`;
+          ctx.beginPath(); ctx.arc(bx, ry + rH / 2, isV ? 3.5 : 2.2, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      ctx.fillStyle = "rgba(200,200,220,0.25)"; ctx.font = "6px monospace"; ctx.fillText("READS", 2, pTop + 10);
+
+      // VAF counter
+      const vaf = Math.round(reads.filter(r => r.alt).length / reads.length * 100);
+      ctx.fillStyle = "rgba(255,107,107,0.65)"; ctx.font = "8px monospace";
+      ctx.textAlign = "right"; ctx.fillText(`VAF ${vaf}%`, W - 4, pTop + 10); ctx.textAlign = "left";
+
+      // Variant column indicator
+      const vx = (varIdx + 1) * cw, pBot = pTop + reads.length * (rH + rG);
+      ctx.strokeStyle = `rgba(255,107,107,${0.16 + 0.10 * Math.sin(t * 3)})`; ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(vx, refY + 12); ctx.lineTo(vx, pBot); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // ── Annotation row (bottom) ──
+      const aY = H * 0.88;
+      ctx.fillStyle = "rgba(255,107,107,0.62)"; ctx.font = "8px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`c.${refBase}>${altBase}  ·  p.Arg→Trp  ·  missense`, W / 2, aY);
       ctx.textAlign = "left";
+      // PATHOGENIC badge
+      const ba = 0.50 + 0.28 * Math.sin(t * 2);
+      ctx.strokeStyle = `rgba(255,107,107,${ba})`; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.rect(W - 65, H - 14, 61, 11); ctx.stroke();
+      ctx.fillStyle = `rgba(255,107,107,${ba * 0.85})`; ctx.font = "6px monospace";
+      ctx.textAlign = "center"; ctx.fillText("PATHOGENIC", W - 34.5, H - 5); ctx.textAlign = "left";
+
       raf = requestAnimationFrame(draw);
     }
     draw();
