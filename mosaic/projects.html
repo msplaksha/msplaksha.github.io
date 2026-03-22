@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Research — MOSAIC Lab</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const toggle = document.getElementById("theme-toggle");
   const root = document.documentElement;
-
   const saved = localStorage.getItem("theme");
   if (saved === "light") {
     root.setAttribute("data-theme","light");
@@ -17,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-
   toggle.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
@@ -50,15 +51,90 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+<script>
+// Fade-up on scroll for .reveal elements
+document.addEventListener("DOMContentLoaded", function () {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add("revealed");
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+});
+</script>
+
 <body>
 <div class="container">
 
 <header class="site-header">
   <div class="brand">
-    <a href="index.html"><img src="Mosaic.png" class="logo-img" alt="MOSAIC logo"></a>
+    <a href="index.html" class="logo-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" class="logo-img" aria-label="MOSAIC logo">
+  <defs>
+    <clipPath id="lc"><circle cx="40" cy="40" r="36"/></clipPath>
+    <style>
+      .lt{animation:lt 4s ease-in-out infinite}
+      .lt:nth-child(1){animation-delay:0s}
+      .lt:nth-child(2){animation-delay:.4s}
+      .lt:nth-child(3){animation-delay:.8s}
+      .lt:nth-child(4){animation-delay:1.2s}
+      .lt:nth-child(5){animation-delay:1.6s}
+      .lt:nth-child(6){animation-delay:2s}
+      .lt:nth-child(7){animation-delay:2.4s}
+      .lt:nth-child(8){animation-delay:2.8s}
+      .lt:nth-child(9){animation-delay:.2s}
+      .lt:nth-child(10){animation-delay:.6s}
+      .lt:nth-child(11){animation-delay:1s}
+      .lt:nth-child(12){animation-delay:1.4s}
+      .lt:nth-child(13){animation-delay:1.8s}
+      .lt:nth-child(14){animation-delay:2.2s}
+      .lt:nth-child(15){animation-delay:2.6s}
+      .lt:nth-child(16){animation-delay:3s}
+      @keyframes lt{0%,100%{opacity:.45}50%{opacity:.95}}
+      .flow-ring{animation:spin 18s linear infinite}
+      @keyframes spin{from{transform:rotate(0deg) translate(-40px,-40px)}
+                       to{transform:rotate(360deg) translate(-40px,-40px)}}
+    </style>
+  </defs>
+  <!-- border ring -->
+  <circle cx="40" cy="40" r="36" fill="#0e0e14" stroke="url(#lg1)" stroke-width="1.5"/>
+  <defs>
+    <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b61ff"/>
+      <stop offset="50%" stop-color="#ff6fd8"/>
+      <stop offset="100%" stop-color="#3ee8b5"/>
+    </linearGradient>
+  </defs>
+  <!-- mosaic tiles clipped to circle -->
+  <g clip-path="url(#lc)">
+    <rect class="lt" x="4"  y="4"  width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="23" y="4"  width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="42" y="4"  width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="61" y="4"  width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="4"  y="23" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="23" y="23" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="42" y="23" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="61" y="23" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="4"  y="42" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="23" y="42" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="42" y="42" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="61" y="42" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="4"  y="61" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="23" y="61" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="42" y="61" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="61" y="61" width="17" height="17" rx="2" fill="#7b61ff"/>
+  </g>
+  <!-- M letter overlay -->
+  <text x="40" y="52" text-anchor="middle"
+        font-family="Space Grotesk,system-ui,sans-serif"
+        font-size="38" font-weight="900"
+        fill="white" opacity="0.92">M</text>
+</svg></a>
     <div class="brand-text">
-      <h1>Lab</h1>
-      <p>Molecular Omics, Structure &amp; Image Computing</p>
+      <span class="brand-wordmark">M<span class="brand-o">O</span>SAIC</span>
+      <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
   <nav class="header-nav">
@@ -75,61 +151,106 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <section>
   <h2 class="section-title">Research</h2>
-  <div class="grid">
-      <article class="card">
-        <span class="tag">Structural Dynamics</span>
-        <h3 class="card-title">Blood–Brain Barrier Regulation &amp; Transporter Dynamics</h3>
-        <p class="card-body">Collectively studying ligand binding, conformational dynamics, and molecular simulations of transporters, we aim to understand how they regulate metabolite flux across the blood–brain barrier.</p>
-      </article>
+  <p class="muted">Our work spans three interconnected themes from atoms to phenotypes.</p>
+  <div class="themes-container">
     
-      <article class="card">
-        <span class="tag">Neuro-Omics</span>
-        <h3 class="card-title">Biomarker Discovery for Amyotrophic Lateral Sclerosis (ALS)</h3>
-        <p class="card-body">Using integrative multi-omics (genomic, transcriptomics &amp; methylomics) and computational pipelines, we aim to identify early-stage ALS biomarkers, enabling improved diagnosis, risk stratification, and personalized therapeutic strategies.</p>
-      </article>
+<div id="structural" class="theme-block reveal">
+  <div class="theme-header" style="border-left: 4px solid var(--accent1); padding-left: 16px;">
+    <h3 class="theme-title" style="color:var(--accent1)">Structural Bioinformatics &amp; Biomolecular Dynamics</h3>
+    <p class="theme-tagline">Atomic-level characterization and thermodynamic profiling of biological macromolecules using MD simulations and enhanced sampling.</p>
+  </div>
+  <div class="theme-projects-grid">
     
-      <article class="card">
-        <span class="tag">Cardiac-Omics</span>
-        <h3 class="card-title">Biomarkers for Acute Coronary Syndrome Through Integrated Multi-Omics</h3>
-        <p class="card-body">Combining real-world patient data (from northern India) with transcriptomic, proteomic, and metabolomic signatures, we aim to uncover molecular indicators of early Acute Cornonary Syndrome (ACS) and its progression.</p>
-      </article>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent1)">
+            <div class="funding-badge">DBT, GoI</div>
+            <h4 class="theme-project-title">Decoding the Neurovascular Unit &amp; Blood-Brain Barrier</h4>
+            <p class="theme-project-desc">We use a multi-scale modeling approach to investigate the NVU, modeling transporter conformational changes and substrate translocation to pave the way for transporter-targeted drugs and nanocarriers designed to cross the BBB.</p>
+          </div>
+        </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent1)">
+            <div class="funding-badge">SERB (ANRF), GoI</div>
+            <h4 class="theme-project-title">Structural Cytokine Engineering for Immunotherapeutics</h4>
+            <p class="theme-project-desc">We computationally derive interaction energies across diverse cytokine-receptor complexes, correlating them with experimental binding affinities to provide a validated biophysical foundation for immune signal design.</p>
+          </div>
+        </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent1)">
+            <div class="funding-badge">Internal</div>
+            <h4 class="theme-project-title">Allosteric Regulation in Transcriptional Repressors</h4>
+            <p class="theme-project-desc">Investigating long-range allosteric communication networks in transcriptional repressors such as DgoR to understand how effector binding modulates DNA-binding activity.</p>
+          </div>
+        </div>
+  </div>
+</div>
+<div id="ai-therapeutics" class="theme-block reveal">
+  <div class="theme-header" style="border-left: 4px solid var(--accent2); padding-left: 16px;">
+    <h3 class="theme-title" style="color:var(--accent2)">AI-Augmented Therapeutics &amp; Peptide Engineering</h3>
+    <p class="theme-tagline">Closed-loop, data-driven pipelines integrating explainable AI with biophysical featurization to navigate chemical space for novel therapeutic agents.</p>
+  </div>
+  <div class="theme-projects-grid">
     
-      <article class="card">
-        <span class="tag">Therapeutics</span>
-        <h3 class="card-title">Hepcidin-Targeted Therapeutics for Anemia</h3>
-        <p class="card-body">We are seeking personnel to develop therapeutic strategies to modulate hepcidin, the master regulator of systemic iron homeostasis, with aim to address anemia of inflammation and iron-restricted erythropoiesis.</p>
-      </article>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent2)">
+            <div class="funding-badge">ICMR</div>
+            <h4 class="theme-project-title">Innovating Peptide Discovery through Explainable AI</h4>
+            <p class="theme-project-desc">We build an active-learning engine integrating ensemble predictive scoring with SHAP-based XAI, translating amino acid sequences into deep biophysical profiles to generate human-readable design rules and discover peptide antagonists for complex metabolic pathways.</p>
+          </div>
+        </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent2)">
+            <div class="funding-badge">Internal</div>
+            <h4 class="theme-project-title">Hepcidin-Targeted Therapeutics for Iron Disorder</h4>
+            <p class="theme-project-desc">Structure-guided design of hepcidin mimetics and antagonists targeting the hepcidin-ferroportin axis for treatment of anemia of chronic disease and iron-overload disorders.</p>
+          </div>
+        </div>
+  </div>
+</div>
+<div id="systems-biology" class="theme-block reveal">
+  <div class="theme-header" style="border-left: 4px solid var(--accent3); padding-left: 16px;">
+    <h3 class="theme-title" style="color:var(--accent3)">Systems Biology &amp; Multi-Omics Biomarker Discovery</h3>
+    <p class="theme-tagline">Integrating large-scale heterogeneous datasets to reconstruct dysregulated pathways, stratify disease risk, and automate diagnostics. Clinical partners: PGIMER, Chandigarh.</p>
+  </div>
+  <div class="theme-projects-grid">
     
-      <article class="card">
-        <span class="tag">AI Imaging</span>
-        <h3 class="card-title">Deep Learning for Bone Marrow Histopathology</h3>
-        <p class="card-body">We are building deep learning pipelines for automated interpretation of bone marrow biopsy images for informed detection of hematological abnormalities and advancement of diagnostic workflows.</p>
-      </article>
-    
-      <article class="card">
-        <span class="tag">Cancer Genomics</span>
-        <h3 class="card-title">Curation of Germline Cancer Variants for Indian Populations</h3>
-        <p class="card-body">We are currently mining literature and multi-omics datasets to compile germline cancer variant as well as transcriptomic and proteomic sets. We aim in immediate future to use these in accordance to FAIR principles for enabling comparative molecular analyses between Indian cohorts and global population.</p>
-      </article>
-    
-      <article class="card">
-        <span class="tag">Immune Structure</span>
-        <h3 class="card-title">Structure-Driven Modeling of Cytokine–Receptor Interactions</h3>
-        <p class="card-body">We are modeling cytokine–receptor assemblies using structural databases, involving state of art AlphaFold, docking, and thermodynamic profiling to inform ligand pleiotropy, and bioactivity. This will have contributions in enabling future of cytokine engineering.</p>
-      </article>
-    
-      <article class="card">
-        <span class="tag">Allostery</span>
-        <h3 class="card-title">Allosteric Regulation in DgoR Transcriptional Repressor</h3>
-        <p class="card-body">We have investigated structural and functional consequences of DgoR super-repressor mutations using long-timescale MD simulations, that have uncoverred allosteric pathways linked to DNA binding and effector-driven regulation. [See publication section]</p>
-      </article>
-    </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent3)">
+            <div class="funding-badge">ICMR, GoI</div>
+            <h4 class="theme-project-title">Precision Biomarkers in Acute Coronary Syndrome</h4>
+            <p class="theme-project-desc">An AI-driven multi-omics strategy integrating genomic, transcriptomic, and proteomic datasets to identify a robust multi-marker diagnostic panel correlated with angiographic severity for precise coronary artery disease risk stratification.</p>
+          </div>
+        </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent3)">
+            <div class="funding-badge">Plaksha University</div>
+            <h4 class="theme-project-title">Rescue Candidates in Amyotrophic Lateral Sclerosis</h4>
+            <p class="theme-project-desc">Using an explainable AI ensemble, we define ALS-relevant gene identity by measuring the Genomic Architecture Barrier rather than just differential expression, uncovering powerful consensus rescue candidates.</p>
+          </div>
+        </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent3)">
+            <div class="funding-badge">Plaksha University</div>
+            <h4 class="theme-project-title">AI-Driven Digital Histopathology — AISAP</h4>
+            <p class="theme-project-desc">An Artificial Intelligent Slide Analysis Program for automated morphological evaluation of bone marrow whole slide imaging, computationally classifying cell types and flagging anomalies to standardize blood disorder diagnostics.</p>
+          </div>
+        </div>
+        <div class="theme-project-card reveal">
+          <div class="theme-project-inner" style="border-left-color:var(--accent3)">
+            <div class="funding-badge">Plaksha University</div>
+            <h4 class="theme-project-title">Indigenous Oncology Mutation Hotspots</h4>
+            <p class="theme-project-desc">Compiling and validating germline variants to re-annotate indigenous oncology mutation hotspots, with a focus on Indian familial breast cancer cohorts.</p>
+          </div>
+        </div>
+  </div>
+</div>
+  </div>
 </section>
 
 
 </div>
 <footer class="site-footer">
-  <p>Designed with AI · Updated and maintained by MOSAIC Lab members</p>
+  <p>Designed with AI &middot; Updated and maintained by MOSAIC Lab members</p>
 </footer>
 </body>
 </html>

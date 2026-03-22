@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Collaborations — MOSAIC Lab</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const toggle = document.getElementById("theme-toggle");
   const root = document.documentElement;
-
   const saved = localStorage.getItem("theme");
   if (saved === "light") {
     root.setAttribute("data-theme","light");
@@ -17,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-
   toggle.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
@@ -50,15 +51,90 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+<script>
+// Fade-up on scroll for .reveal elements
+document.addEventListener("DOMContentLoaded", function () {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add("revealed");
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+});
+</script>
+
 <body>
 <div class="container">
 
 <header class="site-header">
   <div class="brand">
-    <a href="index.html"><img src="Mosaic.png" class="logo-img" alt="MOSAIC logo"></a>
+    <a href="index.html" class="logo-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" class="logo-img" aria-label="MOSAIC logo">
+  <defs>
+    <clipPath id="lc"><circle cx="40" cy="40" r="36"/></clipPath>
+    <style>
+      .lt{animation:lt 4s ease-in-out infinite}
+      .lt:nth-child(1){animation-delay:0s}
+      .lt:nth-child(2){animation-delay:.4s}
+      .lt:nth-child(3){animation-delay:.8s}
+      .lt:nth-child(4){animation-delay:1.2s}
+      .lt:nth-child(5){animation-delay:1.6s}
+      .lt:nth-child(6){animation-delay:2s}
+      .lt:nth-child(7){animation-delay:2.4s}
+      .lt:nth-child(8){animation-delay:2.8s}
+      .lt:nth-child(9){animation-delay:.2s}
+      .lt:nth-child(10){animation-delay:.6s}
+      .lt:nth-child(11){animation-delay:1s}
+      .lt:nth-child(12){animation-delay:1.4s}
+      .lt:nth-child(13){animation-delay:1.8s}
+      .lt:nth-child(14){animation-delay:2.2s}
+      .lt:nth-child(15){animation-delay:2.6s}
+      .lt:nth-child(16){animation-delay:3s}
+      @keyframes lt{0%,100%{opacity:.45}50%{opacity:.95}}
+      .flow-ring{animation:spin 18s linear infinite}
+      @keyframes spin{from{transform:rotate(0deg) translate(-40px,-40px)}
+                       to{transform:rotate(360deg) translate(-40px,-40px)}}
+    </style>
+  </defs>
+  <!-- border ring -->
+  <circle cx="40" cy="40" r="36" fill="#0e0e14" stroke="url(#lg1)" stroke-width="1.5"/>
+  <defs>
+    <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b61ff"/>
+      <stop offset="50%" stop-color="#ff6fd8"/>
+      <stop offset="100%" stop-color="#3ee8b5"/>
+    </linearGradient>
+  </defs>
+  <!-- mosaic tiles clipped to circle -->
+  <g clip-path="url(#lc)">
+    <rect class="lt" x="4"  y="4"  width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="23" y="4"  width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="42" y="4"  width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="61" y="4"  width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="4"  y="23" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="23" y="23" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="42" y="23" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="61" y="23" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="4"  y="42" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="23" y="42" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="42" y="42" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="61" y="42" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="4"  y="61" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="23" y="61" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="42" y="61" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="61" y="61" width="17" height="17" rx="2" fill="#7b61ff"/>
+  </g>
+  <!-- M letter overlay -->
+  <text x="40" y="52" text-anchor="middle"
+        font-family="Space Grotesk,system-ui,sans-serif"
+        font-size="38" font-weight="900"
+        fill="white" opacity="0.92">M</text>
+</svg></a>
     <div class="brand-text">
-      <h1>Lab</h1>
-      <p>Molecular Omics, Structure &amp; Image Computing</p>
+      <span class="brand-wordmark">M<span class="brand-o">O</span>SAIC</span>
+      <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
   <nav class="header-nav">
@@ -77,32 +153,28 @@ document.addEventListener("DOMContentLoaded", function () {
   <h2 class="section-title">Collaborations</h2>
   <p class="muted">Institutions partnering with MOSAIC</p>
   <div class="collab-grid">
-      <div class="collab-card">
+      <div class="collab-card reveal">
         <h3>PGIMER Chandigarh</h3>
         <a class="collab-link" href="https://pgimer.edu.in/" target="_blank">Visit →</a>
       </div>
-    
-      <div class="collab-card">
+      <div class="collab-card reveal">
         <h3>IISER Mohali</h3>
         <a class="collab-link" href="https://www.iisermohali.ac.in/" target="_blank">Visit →</a>
       </div>
-    
-      <div class="collab-card">
+      <div class="collab-card reveal">
         <h3>Panjab University</h3>
         <a class="collab-link" href="https://puchd.ac.in/" target="_blank">Visit →</a>
       </div>
-    
-      <div class="collab-card">
+      <div class="collab-card reveal">
         <h3>Tata Memorial Cancer Center, New Chd.</h3>
         <a class="collab-link" href="https://hbchs.tmc.gov.in/" target="_blank">Visit →</a>
-      </div>
-    </div>
+      </div></div>
 </section>
 
 
 </div>
 <footer class="site-footer">
-  <p>Designed with AI · Updated and maintained by MOSAIC Lab members</p>
+  <p>Designed with AI &middot; Updated and maintained by MOSAIC Lab members</p>
 </footer>
 </body>
 </html>

@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Our Team — MOSAIC Lab</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const toggle = document.getElementById("theme-toggle");
   const root = document.documentElement;
-
   const saved = localStorage.getItem("theme");
   if (saved === "light") {
     root.setAttribute("data-theme","light");
@@ -17,7 +19,6 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-
   toggle.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
@@ -50,15 +51,90 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+<script>
+// Fade-up on scroll for .reveal elements
+document.addEventListener("DOMContentLoaded", function () {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add("revealed");
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+});
+</script>
+
 <body>
 <div class="container">
 
 <header class="site-header">
   <div class="brand">
-    <a href="index.html"><img src="Mosaic.png" class="logo-img" alt="MOSAIC logo"></a>
+    <a href="index.html" class="logo-link"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" class="logo-img" aria-label="MOSAIC logo">
+  <defs>
+    <clipPath id="lc"><circle cx="40" cy="40" r="36"/></clipPath>
+    <style>
+      .lt{animation:lt 4s ease-in-out infinite}
+      .lt:nth-child(1){animation-delay:0s}
+      .lt:nth-child(2){animation-delay:.4s}
+      .lt:nth-child(3){animation-delay:.8s}
+      .lt:nth-child(4){animation-delay:1.2s}
+      .lt:nth-child(5){animation-delay:1.6s}
+      .lt:nth-child(6){animation-delay:2s}
+      .lt:nth-child(7){animation-delay:2.4s}
+      .lt:nth-child(8){animation-delay:2.8s}
+      .lt:nth-child(9){animation-delay:.2s}
+      .lt:nth-child(10){animation-delay:.6s}
+      .lt:nth-child(11){animation-delay:1s}
+      .lt:nth-child(12){animation-delay:1.4s}
+      .lt:nth-child(13){animation-delay:1.8s}
+      .lt:nth-child(14){animation-delay:2.2s}
+      .lt:nth-child(15){animation-delay:2.6s}
+      .lt:nth-child(16){animation-delay:3s}
+      @keyframes lt{0%,100%{opacity:.45}50%{opacity:.95}}
+      .flow-ring{animation:spin 18s linear infinite}
+      @keyframes spin{from{transform:rotate(0deg) translate(-40px,-40px)}
+                       to{transform:rotate(360deg) translate(-40px,-40px)}}
+    </style>
+  </defs>
+  <!-- border ring -->
+  <circle cx="40" cy="40" r="36" fill="#0e0e14" stroke="url(#lg1)" stroke-width="1.5"/>
+  <defs>
+    <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b61ff"/>
+      <stop offset="50%" stop-color="#ff6fd8"/>
+      <stop offset="100%" stop-color="#3ee8b5"/>
+    </linearGradient>
+  </defs>
+  <!-- mosaic tiles clipped to circle -->
+  <g clip-path="url(#lc)">
+    <rect class="lt" x="4"  y="4"  width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="23" y="4"  width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="42" y="4"  width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="61" y="4"  width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="4"  y="23" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="23" y="23" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="42" y="23" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="61" y="23" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="4"  y="42" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="23" y="42" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="42" y="42" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="61" y="42" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="4"  y="61" width="17" height="17" rx="2" fill="#7b61ff"/>
+    <rect class="lt" x="23" y="61" width="17" height="17" rx="2" fill="#ff6fd8"/>
+    <rect class="lt" x="42" y="61" width="17" height="17" rx="2" fill="#3ee8b5"/>
+    <rect class="lt" x="61" y="61" width="17" height="17" rx="2" fill="#7b61ff"/>
+  </g>
+  <!-- M letter overlay -->
+  <text x="40" y="52" text-anchor="middle"
+        font-family="Space Grotesk,system-ui,sans-serif"
+        font-size="38" font-weight="900"
+        fill="white" opacity="0.92">M</text>
+</svg></a>
     <div class="brand-text">
-      <h1>Lab</h1>
-      <p>Molecular Omics, Structure &amp; Image Computing</p>
+      <span class="brand-wordmark">M<span class="brand-o">O</span>SAIC</span>
+      <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
   <nav class="header-nav">
@@ -76,25 +152,13 @@ document.addEventListener("DOMContentLoaded", function () {
 <section>
   <h2 class="section-title">Our Team</h2>
   <div class="member-grid">
-        <div class='pi-banner'>
+        <div class='pi-banner reveal'>
             <img class='pi-banner-photo' src='members/Monika.jpg' alt='Monika Sharma, Ph.D.'>
             <div class='pi-banner-content'>
                 <h2 class='pi-banner-name'>Monika Sharma, Ph.D.</h2>
                 <p class='pi-banner-role'>Principal Investigator</p>
                 <p class='pi-banner-bio'>Group leader, who believes in leading by example. Her projects reflects the lab&#x27;s ethos, and drawing on her multidisciplinary background spanning chemistry, biology and computer science, she guides individual projects with blend of literature informed domain knowledge with strong data driven approaches.</p>
-                <div class='pi-sections'>
-            <div class='pi-section'>
-                <h4>Education</h4>
-                <ul><li>PhD in Computational Natural Sciences, IIIT Hyderabad, 2012</li></ul>
-            </div>
-            <div class='pi-section'>
-                <h4>Experience</h4>
-                <ul><li>Postdoctoral Fellow, Miichigan State University, USA: 2012-2013</li><li>Postdoctoral Fellow, NINDS, NIH, Bethesda, USA: 2013-2014</li><li>Indian Institute of Science Education and Research Mohali: 2015-2021</li><li>Plaksha University: 2021 onwards</li></ul>
-            </div>
-            <div class='pi-section'>
-                <h4>Research Areas</h4>
-                <ul><li>Protein structure analysis</li><li>Molecular dynamics, monte carlo and stochastic simulations</li><li>Systems-level multiomics</li><li>Machine learning for molecular biology</li></ul>
-            </div></div>
+                <div class='pi-sections'><div class='pi-section'><h4>Education</h4><ul><li>PhD in Computational Natural Sciences, IIIT Hyderabad, 2012</li></ul></div><div class='pi-section'><h4>Experience</h4><ul><li>Postdoctoral Fellow, Miichigan State University, USA: 2012-2013</li><li>Postdoctoral Fellow, NINDS, NIH, Bethesda, USA: 2013-2014</li><li>Indian Institute of Science Education and Research Mohali: 2015-2021</li><li>Plaksha University: 2021 onwards</li></ul></div><div class='pi-section'><h4>Research Areas</h4><ul><li>Protein structure analysis</li><li>Molecular dynamics, monte carlo and stochastic simulations</li><li>Systems-level multiomics</li><li>Machine learning for molecular biology</li></ul></div></div>
                 <div class='pi-links'><a class="mini-link" href="mailto:msplaksha[atTheRate]gmail[dot]com"><svg viewBox='0 0 24 24'><path fill='currentColor'
 d='M20 4H4a2 2 0 0 0-2 2v12a2
 2 0 0 0 2 2h16a2 2 0 0 0
@@ -117,8 +181,7 @@ d='M12 2a10 10 0 1 0
 0-12z'/></svg></a></div>
             </div>
         </div>
-        
-        <div class='member-card'>
+        <div class='member-card reveal'>
             <img src='members/megha.jpg' alt='Megha Gupta'>
             <h3>Megha Gupta</h3>
             <p class='role'>Doctoral Researcher</p>
@@ -137,8 +200,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 10.5 12 10.5V10H10v7h2v-4.2c0-1.25.75-1.8
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
-        
-        <div class='member-card'>
+        <div class='member-card reveal'>
             <img src='members/download.jpg' alt='Ankit Patlan'>
             <h3>Ankit Patlan</h3>
             <p class='role'>Research Fellow</p>
@@ -157,8 +219,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 10.5 12 10.5V10H10v7h2v-4.2c0-1.25.75-1.8
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
-        
-        <div class='member-card'>
+        <div class='member-card reveal'>
             <img src='members/kritika.jpg' alt='Kraticka Singhal'>
             <h3>Kraticka Singhal</h3>
             <p class='role'>Doctoral Researcher (Joint with PGIMER, Chd)</p>
@@ -177,8 +238,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 10.5 12 10.5V10H10v7h2v-4.2c0-1.25.75-1.8
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
-        
-        <div class='member-card'>
+        <div class='member-card reveal'>
             <img src='members/paras.jpg' alt='Paras Verma, Ph.D.'>
             <h3>Paras Verma, Ph.D.</h3>
             <p class='role'>Graduate Researcher</p>
@@ -197,8 +257,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 10.5 12 10.5V10H10v7h2v-4.2c0-1.25.75-1.8
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
-        
-        <div class='member-card'>
+        <div class='member-card reveal'>
             <img src='members/keshav.jpg' alt='Keshav Kant'>
             <h3>Keshav Kant</h3>
             <p class='role'>Graduate Researcher</p>
@@ -216,45 +275,41 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 17v-4.5c0-2.25-2-3.25-3.5-3.25S12
 10.5 12 10.5V10H10v7h2v-4.2c0-1.25.75-1.8
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
-        </div>
-        </div>
+        </div></div>
 </section>
 
 <section class="alumni-section">
   <h2 class="section-title">Alumni</h2>
   <p class="muted">Where our former members are today.</p>
   <div class="alumni-grid">
-      <div class="alumni-card small">
+      <div class="alumni-card small reveal">
         <img class="alumni-thumb" src="members/nupur.jpg">
         <h4>Nupur Munjal, Ph.D.</h4>
         <p class="prev-role">Postdoctoral Fellow</p>
         <p class="duration">2023–2025</p>
         <p class="current-pos"><strong>Now:</strong> Asst. Prof. Amity Mohali</p>
       </div>
-    
-      <div class="alumni-card small">
+      <div class="alumni-card small reveal">
         <img class="alumni-thumb" src="members/muskan.jpg">
         <h4>Muskan Kumari</h4>
         <p class="prev-role">Research Fellow</p>
         <p class="duration">2024–2025</p>
         <p class="current-pos"><strong>Now:</strong> Doctoral Researcher, University of Helsinki</p>
       </div>
-    
-      <div class="alumni-card small">
+      <div class="alumni-card small reveal">
         <img class="alumni-thumb" src="members/akhil.jpg">
         <h4>Akhil Pratap</h4>
         <p class="prev-role">Research Fellow</p>
         <p class="duration">2023–2024</p>
         <p class="current-pos"><strong>Now:</strong> MD VKCAPITALS PVT. LTD.</p>
-      </div>
-    </div>
+      </div></div>
 </section>
 
 
 
 </div>
 <footer class="site-footer">
-  <p>Designed with AI · Updated and maintained by MOSAIC Lab members</p>
+  <p>Designed with AI &middot; Updated and maintained by MOSAIC Lab members</p>
 </footer>
 </body>
 </html>
