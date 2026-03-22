@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Research Projects — MOSAIC Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById("theme-toggle");
+  const root = document.documentElement;
+
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") {
+    root.setAttribute("data-theme","light");
+    toggle.textContent = "☀️";
+  } else {
+    toggle.textContent = "🌙";
+  }
+
+  toggle.addEventListener("click", () => {
+    const lightMode = root.getAttribute("data-theme") === "light";
+    if (lightMode) {
+      root.removeAttribute("data-theme");
+      toggle.textContent = "🌙";
+      localStorage.setItem("theme","dark");
+    } else {
+      root.setAttribute("data-theme","light");
+      toggle.textContent = "☀️";
+      localStorage.setItem("theme","light");
+    }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const buttons = document.querySelectorAll(".abstract-toggle");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const abstract = btn.nextElementSibling;
+      if (!abstract) return;
+      if (abstract.style.display === "none" || abstract.style.display === "") {
+        abstract.style.display = "block";
+        btn.textContent = "Hide Abstract ▴";
+      } else {
+        abstract.style.display = "none";
+        btn.textContent = "Show Abstract ▾";
+      }
+    });
+  });
+});
+</script>
+<body>
+<div class="container">
+
+<header class="site-header">
+  <div class="brand">
+    <a href="index.html"><img src="Mosaic.png" class="logo-img" alt="MOSAIC logo"></a>
+    <div class="brand-text">
+      <h1>Lab</h1>
+      <p>Molecular Omics, Structure &amp; Image Computing</p>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <a href="index.html">Home</a>
+    <a href="projects.html" class="active-nav">Projects</a>
+    <a href="members.html">Members</a>
+    <a href="alumni.html">Alumni</a>
+    <a href="collaborations.html">Collaborations</a>
+    <a href="publications.html">Publications</a>
+    <a href="join.html">Join</a>
+    <a class="contact-link" href="mailto:msplaksha[[atTheRate]gmail[dot]com">Contact</a>
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+  </nav>
+</header>
+
+
+<section>
+  <h2 class="section-title">Research Projects</h2>
+  <div class="grid">
+      <article class="card">
+        <span class="tag">Structural Dynamics</span>
+        <h3 class="card-title">Blood–Brain Barrier Regulation &amp; Transporter Dynamics</h3>
+        <p class="card-body">Collectively studying ligand binding, conformational dynamics, and molecular simulations of transporters, we aim to understand how they regulate metabolite flux across the blood–brain barrier.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">Neuro-Omics</span>
+        <h3 class="card-title">Biomarker Discovery for Amyotrophic Lateral Sclerosis (ALS)</h3>
+        <p class="card-body">Using integrative multi-omics (genomic, transcriptomics &amp; methylomics) and computational pipelines, we aim to identify early-stage ALS biomarkers, enabling improved diagnosis, risk stratification, and personalized therapeutic strategies.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">Cardiac-Omics</span>
+        <h3 class="card-title">Biomarkers for Acute Coronary Syndrome Through Integrated Multi-Omics</h3>
+        <p class="card-body">Combining real-world patient data (from northern India) with transcriptomic, proteomic, and metabolomic signatures, we aim to uncover molecular indicators of early Acute Cornonary Syndrome (ACS) and its progression.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">Therapeutics</span>
+        <h3 class="card-title">Hepcidin-Targeted Therapeutics for Anemia</h3>
+        <p class="card-body">We are seeking personnel to develop therapeutic strategies to modulate hepcidin, the master regulator of systemic iron homeostasis, with aim to address anemia of inflammation and iron-restricted erythropoiesis.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">AI Imaging</span>
+        <h3 class="card-title">Deep Learning for Bone Marrow Histopathology</h3>
+        <p class="card-body">We are building deep learning pipelines for automated interpretation of bone marrow biopsy images for informed detection of hematological abnormalities and advancement of diagnostic workflows.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">Cancer Genomics</span>
+        <h3 class="card-title">Curation of Germline Cancer Variants for Indian Populations</h3>
+        <p class="card-body">We are currently mining literature and multi-omics datasets to compile germline cancer variant as well as transcriptomic and proteomic sets. We aim in immediate future to use these in accordance to FAIR principles for enabling comparative molecular analyses between Indian cohorts and global population.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">Immune Structure</span>
+        <h3 class="card-title">Structure-Driven Modeling of Cytokine–Receptor Interactions</h3>
+        <p class="card-body">We are modeling cytokine–receptor assemblies using structural databases, involving state of art AlphaFold, docking, and thermodynamic profiling to inform ligand pleiotropy, and bioactivity. This will have contributions in enabling future of cytokine engineering.</p>
+      </article>
+    
+      <article class="card">
+        <span class="tag">Allostery</span>
+        <h3 class="card-title">Allosteric Regulation in DgoR Transcriptional Repressor</h3>
+        <p class="card-body">We have investigated structural and functional consequences of DgoR super-repressor mutations using long-timescale MD simulations, that have uncoverred allosteric pathways linked to DNA binding and effector-driven regulation. [See publication section]</p>
+      </article>
+    </div>
+</section>
+
+
+</div>
+<footer class="site-footer">
+  <p>Designed with AI · Updated and maintained by MOSAIC Lab members</p>
+</footer>
+</body>
+</html>

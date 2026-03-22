@@ -111,6 +111,12 @@ h1,h2,h3,h4 {
   color: var(--text-secondary);
 }
 
+.header-nav a.active-nav {
+  color: var(--accent1);
+  border-bottom: 2px solid var(--accent1);
+  padding-bottom: 2px;
+}
+
 .theme-toggle {
   margin-left: 12px;
   background: transparent;

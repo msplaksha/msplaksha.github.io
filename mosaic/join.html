@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Join MOSAIC — MOSAIC Lab</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById("theme-toggle");
+  const root = document.documentElement;
+
+  const saved = localStorage.getItem("theme");
+  if (saved === "light") {
+    root.setAttribute("data-theme","light");
+    toggle.textContent = "☀️";
+  } else {
+    toggle.textContent = "🌙";
+  }
+
+  toggle.addEventListener("click", () => {
+    const lightMode = root.getAttribute("data-theme") === "light";
+    if (lightMode) {
+      root.removeAttribute("data-theme");
+      toggle.textContent = "🌙";
+      localStorage.setItem("theme","dark");
+    } else {
+      root.setAttribute("data-theme","light");
+      toggle.textContent = "☀️";
+      localStorage.setItem("theme","light");
+    }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const buttons = document.querySelectorAll(".abstract-toggle");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const abstract = btn.nextElementSibling;
+      if (!abstract) return;
+      if (abstract.style.display === "none" || abstract.style.display === "") {
+        abstract.style.display = "block";
+        btn.textContent = "Hide Abstract ▴";
+      } else {
+        abstract.style.display = "none";
+        btn.textContent = "Show Abstract ▾";
+      }
+    });
+  });
+});
+</script>
+<body>
+<div class="container">
+
+<header class="site-header">
+  <div class="brand">
+    <a href="index.html"><img src="Mosaic.png" class="logo-img" alt="MOSAIC logo"></a>
+    <div class="brand-text">
+      <h1>Lab</h1>
+      <p>Molecular Omics, Structure &amp; Image Computing</p>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <a href="index.html">Home</a>
+    <a href="projects.html">Projects</a>
+    <a href="members.html">Members</a>
+    <a href="alumni.html">Alumni</a>
+    <a href="collaborations.html">Collaborations</a>
+    <a href="publications.html">Publications</a>
+    <a href="join.html" class="active-nav">Join</a>
+    <a class="contact-link" href="mailto:msplaksha[[atTheRate]gmail[dot]com">Contact</a>
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+  </nav>
+</header>
+
+
+<section>
+  <h2 class="section-title">Join MOSAIC</h2>
+  <p class="muted">We welcome structural, omics, and imaging researchers.</p>
+  <div class="cta-row">
+    <a class="btn" href="mailto:msplaksha[[atTheRate]gmail[dot]com">Email msplaksha[[atTheRate]gmail[dot]com</a>
+  </div>
+</section>
+
+
+</div>
+<footer class="site-footer">
+  <p>Designed with AI · Updated and maintained by MOSAIC Lab members</p>
+</footer>
+</body>
+</html>
