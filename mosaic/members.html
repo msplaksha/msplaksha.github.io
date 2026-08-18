@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-  toggle.addEventListener("click", () => {
+  toggle?.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
       root.removeAttribute("data-theme");
@@ -30,6 +30,27 @@ document.addEventListener("DOMContentLoaded", function () {
       toggle.textContent = "☀️";
       localStorage.setItem("theme","light");
     }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const menuButton = document.getElementById("menu-toggle");
+  const nav = document.getElementById("site-nav");
+  if (!menuButton || !nav) return;
+
+  function closeMenu() {
+    nav.classList.remove("is-open");
+    menuButton.setAttribute("aria-expanded", "false");
+  }
+
+  menuButton.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("is-open");
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+  });
+  nav.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 860) closeMenu();
   });
 });
 </script>
@@ -52,17 +73,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  document.querySelectorAll("[data-update-status]").forEach(tag => {
+    const start = new Date(`${tag.dataset.startDate}T00:00:00`);
+    const end = new Date(`${tag.dataset.endDate || tag.dataset.startDate}T00:00:00`);
+    tag.classList.remove("is-upcoming", "is-ongoing");
+
+    if (today < start) {
+      tag.textContent = "Upcoming";
+      tag.classList.add("is-upcoming");
+    } else if (today <= end) {
+      tag.textContent = "Ongoing";
+      tag.classList.add("is-ongoing");
+    } else {
+      tag.textContent = "";
+    }
+  });
+});
+</script>
+<script>
 // Fade-up on scroll for .reveal elements
 document.addEventListener("DOMContentLoaded", function () {
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
+        e.target.classList.remove("reveal-pending");
         e.target.classList.add("revealed");
         obs.unobserve(e.target);
       }
     });
   }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.95) {
+      el.classList.add("revealed");
+    } else {
+      el.classList.add("reveal-pending");
+      obs.observe(el);
+    }
+  });
 });
 </script>
 
@@ -137,8 +188,13 @@ document.addEventListener("DOMContentLoaded", function () {
       <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
-  <nav class="header-nav">
+  <button id="menu-toggle" class="menu-toggle" type="button"
+          aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="site-nav" class="header-nav" aria-label="Main navigation">
     <a href="index.html">Home</a>
+    <a href="updates.html">Updates</a>
     <a href="projects.html">Research</a>
     <a href="members.html" class="active-nav">Members</a>
     <a href="collaborations.html">Collaborations</a>
@@ -179,7 +235,7 @@ d='M12 2a10 10 0 1 0
             </div>
         </div>
         <div class='member-card reveal'>
-            <img src='members/megha.png' alt='Megha Gupta'>
+            <img src='members/megha.png' alt='Megha Gupta' style='object-position:center center'>
             <h3>Megha Gupta</h3>
             <p class='role'>Doctoral Researcher</p>
             <p class='bio small-bio'>Megha works on rare disease biomarker discovery, beginning from ALS. She would be integrating genomic, transcriptomic, and methylomic signals to decode early molecular signatures of neurodegeneration in ALS</p>
@@ -198,7 +254,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
         <div class='member-card reveal'>
-            <img src='members/kraticka.png' alt='Kraticka Singhal'>
+            <img src='members/kraticka.png' alt='Kraticka Singhal' style='object-position:center 25%'>
             <h3>Kraticka Singhal</h3>
             <p class='role'>Doctoral Researcher (Joint with PGIMER, Chd)</p>
             <p class='bio small-bio'>Kraticka is working on innovative multi-omics investigations, analyzing transcriptomic, proteomic, and metabolomic data in patients undergoing compromised heart function. Her investigation would aim to unveil biomarkers for Acute Coronary Syndrome and coronary atherosclerosis</p>
@@ -217,7 +273,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
         <div class='member-card reveal'>
-            <img src='members/keshav.png' alt='Keshav Kant'>
+            <img src='members/keshav.png' alt='Keshav Kant' style='object-position:center center'>
             <h3>Keshav Kant</h3>
             <p class='role'>Doctoral Researcher</p>
             <p class='bio small-bio'>Keshav is working on blood–brain barrier transporter modeling, where he would employ structural biology, ligand screening, and molecular dynamics to understand how transporters regulate metabolite movement across the BBB.</p>
@@ -236,7 +292,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
         <div class='member-card reveal'>
-            <img src='members/ankit.png' alt='Ankit Patlan'>
+            <img src='members/ankit.png' alt='Ankit Patlan' style='object-position:center center'>
             <h3>Ankit Patlan</h3>
             <p class='role'>Research Fellow</p>
             <p class='bio small-bio'>Ankit works on image informatics and building algorithms for automated interpretation of bone-marrow histopathology, which would help understand machine augmented interpretation. This can enable machine-augmented insights into functional biology and disease trigger events.</p>
@@ -255,7 +311,7 @@ d='M19 3a2 2 0 0 1 2 2v14a2 2 0 0
 1.75-1.8S15.5 11.55 15.5 12.8V17h2z'/></svg></a></div>
         </div>
         <div class='member-card reveal'>
-            <img src='members/paras.png' alt='Paras Verma, Ph.D.'>
+            <img src='members/paras.png' alt='Paras Verma, Ph.D.' style='object-position:center center'>
             <h3>Paras Verma, Ph.D.</h3>
             <p class='role'>Postdoctoral Researcher</p>
             <p class='bio small-bio'>Paras is working on germline cancer variant curation initiative, focusing on Indian population genetics. He is working on systematically integrates literature mining, genomic datasets, and FAIR-compliant pipelines to build variant repositories, that would enable comparative molecular and population-scale analyses.</p>

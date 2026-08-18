@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-  toggle.addEventListener("click", () => {
+  toggle?.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
       root.removeAttribute("data-theme");
@@ -30,6 +30,27 @@ document.addEventListener("DOMContentLoaded", function () {
       toggle.textContent = "☀️";
       localStorage.setItem("theme","light");
     }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const menuButton = document.getElementById("menu-toggle");
+  const nav = document.getElementById("site-nav");
+  if (!menuButton || !nav) return;
+
+  function closeMenu() {
+    nav.classList.remove("is-open");
+    menuButton.setAttribute("aria-expanded", "false");
+  }
+
+  menuButton.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("is-open");
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+  });
+  nav.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 860) closeMenu();
   });
 });
 </script>
@@ -52,17 +73,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  document.querySelectorAll("[data-update-status]").forEach(tag => {
+    const start = new Date(`${tag.dataset.startDate}T00:00:00`);
+    const end = new Date(`${tag.dataset.endDate || tag.dataset.startDate}T00:00:00`);
+    tag.classList.remove("is-upcoming", "is-ongoing");
+
+    if (today < start) {
+      tag.textContent = "Upcoming";
+      tag.classList.add("is-upcoming");
+    } else if (today <= end) {
+      tag.textContent = "Ongoing";
+      tag.classList.add("is-ongoing");
+    } else {
+      tag.textContent = "";
+    }
+  });
+});
+</script>
+<script>
 // Fade-up on scroll for .reveal elements
 document.addEventListener("DOMContentLoaded", function () {
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
+        e.target.classList.remove("reveal-pending");
         e.target.classList.add("revealed");
         obs.unobserve(e.target);
       }
     });
   }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.95) {
+      el.classList.add("revealed");
+    } else {
+      el.classList.add("reveal-pending");
+      obs.observe(el);
+    }
+  });
 });
 </script>
 <script>/* MOSAIC Lab — Research page canvas animations
@@ -1025,8 +1076,13 @@ document.addEventListener("DOMContentLoaded", function () {
       <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
-  <nav class="header-nav">
+  <button id="menu-toggle" class="menu-toggle" type="button"
+          aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="site-nav" class="header-nav" aria-label="Main navigation">
     <a href="index.html">Home</a>
+    <a href="updates.html">Updates</a>
     <a href="projects.html" class="active-nav">Research</a>
     <a href="members.html">Members</a>
     <a href="collaborations.html">Collaborations</a>

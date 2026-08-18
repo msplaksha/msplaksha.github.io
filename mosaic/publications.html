@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-  toggle.addEventListener("click", () => {
+  toggle?.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
       root.removeAttribute("data-theme");
@@ -30,6 +30,27 @@ document.addEventListener("DOMContentLoaded", function () {
       toggle.textContent = "☀️";
       localStorage.setItem("theme","light");
     }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const menuButton = document.getElementById("menu-toggle");
+  const nav = document.getElementById("site-nav");
+  if (!menuButton || !nav) return;
+
+  function closeMenu() {
+    nav.classList.remove("is-open");
+    menuButton.setAttribute("aria-expanded", "false");
+  }
+
+  menuButton.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("is-open");
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+  });
+  nav.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 860) closeMenu();
   });
 });
 </script>
@@ -52,17 +73,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  document.querySelectorAll("[data-update-status]").forEach(tag => {
+    const start = new Date(`${tag.dataset.startDate}T00:00:00`);
+    const end = new Date(`${tag.dataset.endDate || tag.dataset.startDate}T00:00:00`);
+    tag.classList.remove("is-upcoming", "is-ongoing");
+
+    if (today < start) {
+      tag.textContent = "Upcoming";
+      tag.classList.add("is-upcoming");
+    } else if (today <= end) {
+      tag.textContent = "Ongoing";
+      tag.classList.add("is-ongoing");
+    } else {
+      tag.textContent = "";
+    }
+  });
+});
+</script>
+<script>
 // Fade-up on scroll for .reveal elements
 document.addEventListener("DOMContentLoaded", function () {
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
+        e.target.classList.remove("reveal-pending");
         e.target.classList.add("revealed");
         obs.unobserve(e.target);
       }
     });
   }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.95) {
+      el.classList.add("revealed");
+    } else {
+      el.classList.add("reveal-pending");
+      obs.observe(el);
+    }
+  });
 });
 </script>
 
@@ -137,8 +188,13 @@ document.addEventListener("DOMContentLoaded", function () {
       <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
-  <nav class="header-nav">
+  <button id="menu-toggle" class="menu-toggle" type="button"
+          aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="site-nav" class="header-nav" aria-label="Main navigation">
     <a href="index.html">Home</a>
+    <a href="updates.html">Updates</a>
     <a href="projects.html">Research</a>
     <a href="members.html">Members</a>
     <a href="collaborations.html">Collaborations</a>
@@ -152,6 +208,18 @@ document.addEventListener("DOMContentLoaded", function () {
 <section>
   <h2 class="section-title">Publications</h2>
   <div class="pub-list">
+      <div class="pub-item reveal">
+        <h3 class="pub-title">Multi-omic machine learning overcomes transcriptomic blind spots to rescue therapeutic targets in ALS</h3>
+        <p class="pub-meta">Monika Sharma; Megha Gupta; Paras Verma &bull; <strong class='pub-journal'>Research Square (preprint)</strong> &bull; 2026 <a class="pub-link" href="https://www.researchsquare.com/article/rs-9305370/v1" target="_blank">[View]</a></p>
+        <button class="abstract-toggle">Show Abstract &#9662;</button>
+        <p class="abstract-text" style="display:none;">Amyotrophic lateral sclerosis (ALS) lacks effective therapies partly because transcriptomic screens cannot distinguish disease-relevant genes from downstream perturbations. Here we integrate a cross-tissue meta-analysis of 13 datasets (1,227 samples; CNS, myeloid, lymphoid, and mesenchymal domains) with an explainable machine learning framework trained on evolutionary constraint, brain expression, interaction-network topology, Mendelian disease annotations, and 12 engineered cross-database interaction terms. SHAP-based decomposition of an ensemble classifier reveals that ALS gene identity is defined by the convergence of neurological disease history, evolutionary constraint, brain-enriched expression, and network centrality, not differential expression magnitude. In silico drug-reversal simulations formalize this as a model-derived hypothesis, the Genomic Architecture Barrier, demonstrating that within the model’s feature space pharmacological correction of modifiable features alone is insufficient to shift predicted disease relevance beyond classification threshold. A nine-axis multi-evidence evaluation framework identifies eleven consensus prioritized candidates, led by ATP1A1, YWHAG, and ANLN, that share the genomic signature of established ALS associated genes and interact physically with ALS proteins across autophagy-proteostasis, RNA-processing, cytoskeletal, and innate-immunity axes. Instead of cataloging expression changes, this framework identifies new therapeutic targets by prioritizing genes whose genomic architecture mirrors that of known ALS-associated genes.</p>
+      </div>
+      <div class="pub-item reveal">
+        <h3 class="pub-title">Automated Bone Marrow Cellularity Estimation from Whole-Slide Images Using Deep Learning: Validation in an Indian Clinical Cohort</h3>
+        <p class="pub-meta">Ankit Patlan Patil; Pulkit Rastogi; Durgadevi Sunderasan; Amanjit Bal; Prashant Sharma; Monika Sharma; Vishal Bhardwaj &bull; <strong class='pub-journal'>Research Square (preprint)</strong> &bull; 2026 <a class="pub-link" href="https://www.researchsquare.com/article/rs-10468634/v1" target="_blank">[View]</a></p>
+        <button class="abstract-toggle">Show Abstract &#9662;</button>
+        <p class="abstract-text" style="display:none;">Bone marrow evaluation is central to diagnosing leukemia, lymphoma, unexplained cytopenias and other hematologic disorders, yet it depends on specialised expertise and remains time-consuming, subjective and prone to interobserver variability. We present the Artificial Intelligence Slide Analysis Platform (AiSAP), a deep learning framework for automated bone marrow cellularity estimation directly from raw whole-slide images (WSIs), trained and validated on an Indian clinical trephine biopsy cohort that is underrepresented in existing automated pipelines. Unlike approaches restricted to cropped or pre-selected patches, AiSAP performs end-to-end WSI tiling, automated marrow region-of-interest extraction and adipocyte segmentation using a dual Mask R-CNN architecture, before computing a case-level cellularity ratio. Across five backbone configurations, average precision ranged from 45.3% to 51.9%, while case-level concordance reached up to a Pearson correlation coefficient of 0.95 and Lin&#x27;s concordance correlation coefficient of 0.88 (depending on the backbone). These results show that AiSAP achieves expert-level concordance for automated cellularity estimation and represents a promising, generalizable step toward clinical decision support in bone marrow pathology, warranting further multi-institutional validation.</p>
+      </div>
       <div class="pub-item reveal">
         <h3 class="pub-title">Functional consequences of genetic variations in DgoR, a GntR/FadR family transcriptional repressor of D-galactonate metabolism in Escherichia coli</h3>
         <p class="pub-meta">Swati Singh; Rajesh Mishra; Richa Ashok Kakkar; Shivam Singla; Akhil Pratap; Gaurav Sharma; Monika Sharma; Rachna Chaba; Melissa M. Kendall &bull; <strong class='pub-journal'>J Bacteriol.</strong> &bull; 2025 <a class="pub-link" href="https://pubmed.ncbi.nlm.nih.gov/40497739/" target="_blank">[View]</a></p>

@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   } else {
     toggle.textContent = "🌙";
   }
-  toggle.addEventListener("click", () => {
+  toggle?.addEventListener("click", () => {
     const lightMode = root.getAttribute("data-theme") === "light";
     if (lightMode) {
       root.removeAttribute("data-theme");
@@ -30,6 +30,27 @@ document.addEventListener("DOMContentLoaded", function () {
       toggle.textContent = "☀️";
       localStorage.setItem("theme","light");
     }
+  });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const menuButton = document.getElementById("menu-toggle");
+  const nav = document.getElementById("site-nav");
+  if (!menuButton || !nav) return;
+
+  function closeMenu() {
+    nav.classList.remove("is-open");
+    menuButton.setAttribute("aria-expanded", "false");
+  }
+
+  menuButton.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("is-open");
+    menuButton.setAttribute("aria-expanded", String(isOpen));
+  });
+  nav.querySelectorAll("a").forEach(link => link.addEventListener("click", closeMenu));
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 860) closeMenu();
   });
 });
 </script>
@@ -52,17 +73,47 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  document.querySelectorAll("[data-update-status]").forEach(tag => {
+    const start = new Date(`${tag.dataset.startDate}T00:00:00`);
+    const end = new Date(`${tag.dataset.endDate || tag.dataset.startDate}T00:00:00`);
+    tag.classList.remove("is-upcoming", "is-ongoing");
+
+    if (today < start) {
+      tag.textContent = "Upcoming";
+      tag.classList.add("is-upcoming");
+    } else if (today <= end) {
+      tag.textContent = "Ongoing";
+      tag.classList.add("is-ongoing");
+    } else {
+      tag.textContent = "";
+    }
+  });
+});
+</script>
+<script>
 // Fade-up on scroll for .reveal elements
 document.addEventListener("DOMContentLoaded", function () {
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
+        e.target.classList.remove("reveal-pending");
         e.target.classList.add("revealed");
         obs.unobserve(e.target);
       }
     });
   }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach(el => obs.observe(el));
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.95) {
+      el.classList.add("revealed");
+    } else {
+      el.classList.add("reveal-pending");
+      obs.observe(el);
+    }
+  });
 });
 </script>
 <script>
@@ -1223,8 +1274,13 @@ window.addEventListener("load", function () {
       <p class="brand-sub">Lab &middot; Molecular Omics, Structure &amp; Image Computing</p>
     </div>
   </div>
-  <nav class="header-nav">
+  <button id="menu-toggle" class="menu-toggle" type="button"
+          aria-controls="site-nav" aria-expanded="false" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="site-nav" class="header-nav" aria-label="Main navigation">
     <a href="index.html" class="active-nav">Home</a>
+    <a href="updates.html">Updates</a>
     <a href="projects.html">Research</a>
     <a href="members.html">Members</a>
     <a href="collaborations.html">Collaborations</a>
@@ -1304,6 +1360,43 @@ window.addEventListener("load", function () {
   </div>
 </section>
 
+<section id="latest-updates" class="home-updates-section">
+  <div class="home-updates-header">
+    <div>
+      <span class="eyebrow">Around the lab</span>
+      <h2 class="section-title">News &amp; Updates</h2>
+    </div>
+    <a class="see-all-link" href="updates.html">See all &rarr;</a>
+  </div>
+  <div class="update-preview-grid">
+    
+        <article class="update-preview-card reveal">
+          <img class="update-preview-image is-contain" src="news_media/IISC_workshop.jpg" alt="Poster for the computational oncology workshop" loading="lazy">
+          <div class="update-preview-content">
+            <div class="update-meta"><time datetime="2026-08-28">28–29 Aug 2026</time><span>Workshop</span></div>
+            <h3>Dr. Monika Sharma to serve as a resource person at computational oncology workshop</h3>
+            <p>Dr. Monika Sharma will serve as a resource person for a two-day workshop on computational oncology, organized by CEMB, SSSIHL, Puttaparthi, in collaboration with PHCCO, IISc Bengaluru.</p>
+          </div>
+        </article>
+        <article class="update-preview-card reveal">
+          <img class="update-preview-image is-contain" src="news_media/Biotech.jpg" alt="ConfBioTech 2026 event poster" loading="lazy">
+          <div class="update-preview-content">
+            <div class="update-meta"><time datetime="2026-08-21">21 Aug 2026</time><span>Conference</span></div>
+            <h3>Plaksha University to organize ConfBioTech 2026</h3>
+            <p>Plaksha University will organize ConfBioTech on 21 August 2026.</p>
+          </div>
+        </article>
+        <article class="update-preview-card reveal">
+          <img class="update-preview-image" src="news_media/MeghaSpain.jpeg" alt="Megha presenting her poster at the ENCALS Meeting 2026 in Madrid" loading="lazy" style="object-position:center 25%">
+          <div class="update-preview-content">
+            <div class="update-meta"><time datetime="2026-06-23">23–26 Jun 2026</time><span>Conference</span></div>
+            <h3>Megha presents at the ENCALS Meeting 2026</h3>
+            <p>Megha presented a poster at the ENCALS Meeting 2026 in Madrid, Spain, held from 23 to 26 June.</p>
+          </div>
+        </article>
+  </div>
+</section>
+
 <section class="home-pubs-section">
   <div class="home-pubs-header">
     <h2 class="section-title" style="margin-bottom:0">Recent Publications</h2>
@@ -1312,16 +1405,16 @@ window.addEventListener("load", function () {
   <div class="recent-pubs-list">
     
       <div class="recent-pub-item reveal">
+        <p class="recent-pub-title">Multi-omic machine learning overcomes transcriptomic blind spots to rescue therapeutic targets in ALS</p>
+        <p class="pub-meta">Monika Sharma; Megha Gupta; Paras Verma… &bull; <strong class="pub-journal">Research Square (preprint)</strong> &bull; 2026 <a class="pub-link" href="https://www.researchsquare.com/article/rs-9305370/v1" target="_blank">[View]</a></p>
+      </div>
+      <div class="recent-pub-item reveal">
+        <p class="recent-pub-title">Automated Bone Marrow Cellularity Estimation from Whole-Slide Images Using Deep Learning: Validation in an Indian Clinical Cohort</p>
+        <p class="pub-meta">Ankit Patlan Patil; Pulkit Rastogi; Durgadevi Sunderasan; Am… &bull; <strong class="pub-journal">Research Square (preprint)</strong> &bull; 2026 <a class="pub-link" href="https://www.researchsquare.com/article/rs-10468634/v1" target="_blank">[View]</a></p>
+      </div>
+      <div class="recent-pub-item reveal">
         <p class="recent-pub-title">Functional consequences of genetic variations in DgoR, a GntR/FadR family transcriptional repressor of D-galactonate metabolism in Escherichia coli</p>
         <p class="pub-meta">Swati Singh; Rajesh Mishra; Richa Ashok Kakkar; Shivam Singl… &bull; <strong class="pub-journal">J Bacteriol.</strong> &bull; 2025 <a class="pub-link" href="https://pubmed.ncbi.nlm.nih.gov/40497739/" target="_blank">[View]</a></p>
-      </div>
-      <div class="recent-pub-item reveal">
-        <p class="recent-pub-title">Molecular mechanisms underlying allosteric behavior of Escherichia coli DgoR, a GntR/FadR family transcriptional regulator.</p>
-        <p class="pub-meta">Singh S, Arya G, Mishra R, Singla S, Pratap A, Upadhayay K, … &bull; <strong class="pub-journal">Nucleic Acids Res.</strong> &bull; 2025 <a class="pub-link" href="https://pubmed.ncbi.nlm.nih.gov/39777470/" target="_blank">[View]</a></p>
-      </div>
-      <div class="recent-pub-item reveal">
-        <p class="recent-pub-title">In silico B-cell epitope prediction and molecular docking of Aspergillus allergens targeting improved ABPA diagnosis</p>
-        <p class="pub-meta">Agrawal D, Sharma M, Sachdeva R, Priyadarshini P, Minhas AP… &bull; <strong class="pub-journal">J Asthma.</strong> &bull; 2025 <a class="pub-link" href="https://pubmed.ncbi.nlm.nih.gov/39425953/" target="_blank">[View]</a></p>
       </div>
   </div>
 </section>
